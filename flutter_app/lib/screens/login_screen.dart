@@ -48,13 +48,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (success) {
       Navigator.pushReplacementNamed(context, '/dashboard');
-    } else if (auth.error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(auth.error!),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+    } else {
+      final error = auth.error;
+      if (error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(error),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
     }
   }
 

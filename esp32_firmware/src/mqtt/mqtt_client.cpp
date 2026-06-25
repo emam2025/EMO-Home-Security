@@ -91,7 +91,7 @@ void MqttClient::disconnect() {
     mqttClient_.disconnect();
 }
 
-bool MqttClient::isConnected() const {
+bool MqttClient::isConnected() {
     return mqttClient_.connected();
 }
 
@@ -183,10 +183,10 @@ void MqttClient::handleMessage(const std::string& topicStr, const std::string& p
     if (topicStr == cmdTopic) {
         JsonDocument doc;
         DeserializationError err = deserializeJson(doc, payloadStr);
-        if (!err && doc.containsKey("command")) {
+        if (!err && doc["command"].is<const char*>()) {
             const char* command = doc["command"];
             std::string params;
-            if (doc.containsKey("params")) {
+            if (doc["params"].is<JsonObject>()) {
                 serializeJson(doc["params"], params);
             }
             if (commandCallback_) {

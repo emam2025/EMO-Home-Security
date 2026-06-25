@@ -1,6 +1,7 @@
 #include "credential_manager.h"
-#include "nvs_manager.h"
+#include "../nvs/nvs_manager.h"
 #include <Arduino.h>
+#include <WiFi.h>
 
 // SECURITY: Device-specific XOR key derived from MAC address
 // This is NOT military-grade encryption but prevents plaintext NVS dumps
@@ -34,7 +35,7 @@ bool CredentialManager::load() {
 
     // SECURITY: Decrypt loaded credentials using XOR obfuscation
     if (!routerPassword_.empty()) {
-        xorEncrypt(reinterpret_cast<uint8_t*>(routerPassword_.data()), routerPassword_.size());
+        xorEncrypt(reinterpret_cast<uint8_t*>(&routerPassword_[0]), routerPassword_.size());
     }
 
     return hasStoredCredentials();
@@ -44,7 +45,7 @@ bool CredentialManager::save() {
     // SECURITY: Create encrypted copy before storing
     std::string encryptedPass = routerPassword_;
     if (!encryptedPass.empty()) {
-        xorEncrypt(reinterpret_cast<uint8_t*>(encryptedPass.data()), encryptedPass.size());
+        xorEncrypt(reinterpret_cast<uint8_t*>(&encryptedPass[0]), encryptedPass.size());
     }
 
     bool ok = true;

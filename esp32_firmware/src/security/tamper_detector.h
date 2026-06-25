@@ -4,6 +4,11 @@
 #include <functional>
 #include <string>
 
+// Suppress PubSubClient macro that clashes with our enum
+#ifdef MQTT_CONNECTION_LOST
+#undef MQTT_CONNECTION_LOST
+#endif
+
 enum class TamperEvent {
     ROUTER_RESTARTED,
     ROUTER_CREDENTIALS_FAILED,

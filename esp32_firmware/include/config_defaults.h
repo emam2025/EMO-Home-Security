@@ -8,7 +8,7 @@ enum class RouterModel {
 };
 
 enum class DnsProvider {
-    DEFAULT,
+    DNS_DEFAULT,
     CLOUDFLARE_FAMILY,
     OPENDNS_FAMILY
 };

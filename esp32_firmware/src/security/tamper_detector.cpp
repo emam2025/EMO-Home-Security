@@ -25,7 +25,7 @@ void TamperDetector::reportRouterLoginResult(bool success) {
     } else {
         consecutiveLoginFailures_++;
         if (consecutiveLoginFailures_ >= MAX_LOGIN_FAILURES && !routerUnreachableReported_) {
-            fire(TamperEvent::ROUTER_CREDENTIALS_FAILED, "Router login failed " + String(consecutiveLoginFailures_) + " times");
+            fire(TamperEvent::ROUTER_CREDENTIALS_FAILED, std::string("Router login failed ") + std::to_string(consecutiveLoginFailures_) + " times");
         }
     }
 }
@@ -34,7 +34,7 @@ void TamperDetector::reportRouterUptime(uint32_t uptimeSec) {
     if (uptimeSec > 0) {
         if (hadValidUptime_ && uptimeSec < knownUptimeSec_ - 60) {
             fire(TamperEvent::ROUTER_RESTARTED,
-                "Router uptime dropped from " + String(knownUptimeSec_) + "s to " + String(uptimeSec_) + "s");
+                std::string("Router uptime dropped from ") + std::to_string(knownUptimeSec_) + "s to " + std::to_string(uptimeSec) + "s");
         }
         knownUptimeSec_ = uptimeSec;
         hadValidUptime_ = true;
@@ -64,7 +64,7 @@ void TamperDetector::checkRouterHealth() {
     if (consecutiveLoginFailures_ >= MAX_LOGIN_FAILURES) {
         uint32_t elapsed = millis() - mqttDisconnectStartMs_;
         if (elapsed >= ROUTER_UNREACHABLE_TIMEOUT_MS && !routerUnreachableReported_) {
-            fire(TamperEvent::ROUTER_UNREACHABLE, "Router unreachable for " + String(elapsed / 1000) + "s");
+            fire(TamperEvent::ROUTER_UNREACHABLE, std::string("Router unreachable for ") + std::to_string(elapsed / 1000) + "s");
             routerUnreachableReported_ = true;
         }
     }
@@ -74,7 +74,7 @@ void TamperDetector::checkMqttHealth() {
     if (!lastMqttConnected_ && mqttDisconnectStartMs_ > 0) {
         uint32_t elapsed = millis() - mqttDisconnectStartMs_;
         if (elapsed >= MQTT_OFFLINE_ALERT_MS) {
-            fire(TamperEvent::MQTT_CONNECTION_LOST, "MQTT offline for " + String(elapsed / 1000) + "s");
+            fire(TamperEvent::MQTT_CONNECTION_LOST, std::string("MQTT offline for ") + std::to_string(elapsed / 1000) + "s");
         }
     }
 }

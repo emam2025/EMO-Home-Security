@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/network_device.dart';
+import '../providers/auth_provider.dart';
 import '../providers/home_provider.dart';
 import '../widgets/device_tile.dart';
 

@@ -100,7 +100,10 @@ class HomeProvider extends ChangeNotifier {
           .map((e) => Device.fromJson(e as Map<String, dynamic>))
           .toList();
       notifyListeners();
-    } catch (_) {}
+    } catch (e) {
+      _error = 'Failed to reload devices: $e';
+      notifyListeners();
+    }
   }
 
   Future<void> _reloadNetworkDevices(String homeId) async {
@@ -110,7 +113,10 @@ class HomeProvider extends ChangeNotifier {
           .map((e) => NetworkDevice.fromJson(e as Map<String, dynamic>))
           .toList();
       notifyListeners();
-    } catch (_) {}
+    } catch (e) {
+      _error = 'Failed to reload network devices: $e';
+      notifyListeners();
+    }
   }
 
   Future<void> _reloadNotifications(String homeId) async {
@@ -120,7 +126,10 @@ class HomeProvider extends ChangeNotifier {
           .map((e) => NotificationItem.fromJson(e as Map<String, dynamic>))
           .toList();
       notifyListeners();
-    } catch (_) {}
+    } catch (e) {
+      _error = 'Failed to reload notifications: $e';
+      notifyListeners();
+    }
   }
 
   Future<void> _reloadProfiles(String homeId) async {
@@ -130,7 +139,10 @@ class HomeProvider extends ChangeNotifier {
           .map((e) => Profile.fromJson(e as Map<String, dynamic>))
           .toList();
       notifyListeners();
-    } catch (_) {}
+    } catch (e) {
+      _error = 'Failed to reload profiles: $e';
+      notifyListeners();
+    }
   }
 
   void disconnectWebSocket() {
@@ -275,7 +287,10 @@ class HomeProvider extends ChangeNotifier {
         _notifications[index] = _notifications[index].copyWith(isRead: true);
         notifyListeners();
       }
-    } catch (_) {}
+    } catch (e) {
+      _error = 'Failed to mark notification as read: $e';
+      notifyListeners();
+    }
   }
 
   Future<void> markAllNotificationsRead() async {

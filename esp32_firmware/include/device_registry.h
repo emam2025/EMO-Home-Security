@@ -15,13 +15,6 @@ struct DeviceEntry {
     uint32_t lastSeen;
 };
 
-struct PolicyAction {
-    std::string deviceMac;
-    std::string profileId;
-    std::string reason;
-    enum Type { BLOCK, UNBLOCK } type;
-};
-
 class DeviceRegistry {
 public:
     DeviceRegistry();

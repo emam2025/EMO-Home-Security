@@ -171,7 +171,7 @@ class DeviceTile extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final profile = profiles[index];
                     return ListTile(
-                      leading: CircleAvatar(child: Text(profile.name[0])),
+                      leading: CircleAvatar(child: Text(profile.name.isNotEmpty ? profile.name[0] : '?')),
                       title: Text(profile.name),
                       onTap: () {
                         Navigator.pop(context);

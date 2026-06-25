@@ -46,7 +46,7 @@ bool OtaUpdater::performUpdate() {
 
     int httpCode = http.GET();
     if (httpCode != HTTP_CODE_OK) {
-        if (resultCallback_) resultCallback_(false, "HTTP " + String(httpCode));
+        if (resultCallback_) resultCallback_(false, std::string("HTTP ") + std::to_string(httpCode));
         state_ = OtaState::FAILED;
         http.end();
         return false;
@@ -61,7 +61,7 @@ bool OtaUpdater::performUpdate() {
     }
 
     if (!Update.begin(totalSize, U_FLASH)) {
-        if (resultCallback_) resultCallback_(false, "Not enough space: " + String(Update.errorString()));
+        if (resultCallback_) resultCallback_(false, std::string("Not enough space: ") + std::string(Update.errorString()));
         state_ = OtaState::FAILED;
         http.end();
         return false;
@@ -77,7 +77,7 @@ bool OtaUpdater::performUpdate() {
             int bytesRead = stream->readBytes(buf, std::min((size_t)sizeof(buf), available));
             size_t bytesWritten = Update.write(buf, bytesRead);
             if (bytesWritten != bytesRead) {
-                if (resultCallback_) resultCallback_(false, "Write error: " + String(Update.errorString()));
+                if (resultCallback_) resultCallback_(false, std::string("Write error: ") + std::string(Update.errorString()));
                 Update.end();
                 state_ = OtaState::FAILED;
                 http.end();
@@ -96,7 +96,7 @@ bool OtaUpdater::performUpdate() {
     http.end();
 
     if (!Update.end()) {
-        if (resultCallback_) resultCallback_(false, "Update finalize failed: " + String(Update.errorString()));
+        if (resultCallback_) resultCallback_(false, std::string("Update finalize failed: ") + std::string(Update.errorString()));
         state_ = OtaState::FAILED;
         return false;
     }

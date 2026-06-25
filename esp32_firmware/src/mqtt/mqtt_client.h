@@ -23,7 +23,7 @@ public:
 
     bool connect();
     void disconnect();
-    bool isConnected() const;
+    bool isConnected();
 
     void loop();
 

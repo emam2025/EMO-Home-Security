@@ -40,9 +40,7 @@ static void setupMqttCallbacks() {
         JsonDocument doc;
         DeserializationError error = deserializeJson(doc, payload);
         if (error) {
-            mqttClient.publishAlert(
-                "{\"error\":\"invalid_json\"}"
-            );
+            mqttClient.publishAlert(std::string("{\"error\":\"invalid_json\"}"));
             return;
         }
 
@@ -55,45 +53,33 @@ static void setupMqttCallbacks() {
             std::string mac = doc["mac"].as<std::string>();
             if (!mac.empty()) {
                 bool ok = routerDriver.blockDevice(mac);
-                mqttClient.publishEvent(
-                    "{\"event\":\"block_device\",\"mac\":\"" + mac + "\",\"success\":" + (ok ? "true" : "false") + "}"
-                );
+                mqttClient.publishEvent(std::string("{\"event\":\"block_device\",\"mac\":\"") + mac + "\",\"success\":" + (ok ? "true" : "false") + "}");
             }
         } else if (commandStr == "unblock_device") {
             std::string mac = doc["mac"].as<std::string>();
             if (!mac.empty()) {
                 bool ok = routerDriver.unblockDevice(mac);
-                mqttClient.publishEvent(
-                    "{\"event\":\"unblock_device\",\"mac\":\"" + mac + "\",\"success\":" + (ok ? "true" : "false") + "}"
-                );
+                mqttClient.publishEvent(std::string("{\"event\":\"unblock_device\",\"mac\":\"") + mac + "\",\"success\":" + (ok ? "true" : "false") + "}");
             }
         } else if (commandStr == "set_dns") {
             std::string primary = doc["primary_dns"].as<std::string>();
             std::string secondary = doc["secondary_dns"].as<std::string>();
             bool ok = routerDriver.setDNS(primary, secondary);
-            mqttClient.publishEvent(
-                "{\"event\":\"set_dns\",\"success\":" + (ok ? "true" : "false") + "}"
-            );
+            mqttClient.publishEvent(std::string("{\"event\":\"set_dns\",\"success\":") + (ok ? "true" : "false") + "}");
         } else if (commandStr == "reboot") {
             bool ok = routerDriver.reboot();
-            mqttClient.publishEvent(
-                "{\"event\":\"reboot\",\"success\":" + (ok ? "true" : "false") + "}"
-            );
+            mqttClient.publishEvent(std::string("{\"event\":\"reboot\",\"success\":") + (ok ? "true" : "false") + "}");
         } else if (commandStr == "pause_internet") {
             bool ok = routerDriver.enableWhitelist();
-            mqttClient.publishEvent(
-                "{\"event\":\"pause_internet\",\"success\":" + (ok ? "true" : "false") + "}"
-            );
+            mqttClient.publishEvent(std::string("{\"event\":\"pause_internet\",\"success\":") + (ok ? "true" : "false") + "}");
         } else if (commandStr == "resume_internet") {
             bool ok = routerDriver.disableWhitelist();
-            mqttClient.publishEvent(
-                "{\"event\":\"resume_internet\",\"success\":" + (ok ? "true" : "false") + "}"
-            );
+            mqttClient.publishEvent(std::string("{\"event\":\"resume_internet\",\"success\":") + (ok ? "true" : "false") + "}");
         } else if (commandStr == "sync_policies") {
             std::string policiesJson;
             serializeJson(doc["policies"], policiesJson);
             policyEngine.updatePolicies(policiesJson);
-            mqttClient.publishEvent("{\"event\":\"policies_synced\"}");
+            mqttClient.publishEvent(std::string("{\"event\":\"policies_synced\"}"));
         } else if (commandStr == "update_credentials") {
             std::string ip = doc["ip"].as<std::string>();
             std::string user = doc["username"].as<std::string>();
@@ -102,9 +88,7 @@ static void setupMqttCallbacks() {
             routerDriver.setCredentials(ip, user, pass);
             bool ok = routerDriver.login();
             tamperDetector.reportRouterLoginResult(ok);
-            mqttClient.publishEvent(
-                "{\"event\":\"credentials_updated\",\"success\":" + (ok ? "true" : "false") + "}"
-            );
+            mqttClient.publishEvent(std::string("{\"event\":\"credentials_updated\",\"success\":") + (ok ? "true" : "false") + "}");
         } else if (commandStr == "recover_router") {
             credentialManager.load();
             routerDriver.setCredentials(
@@ -114,9 +98,7 @@ static void setupMqttCallbacks() {
             );
             bool ok = routerDriver.login();
             tamperDetector.reportRouterLoginResult(ok);
-            mqttClient.publishEvent(
-                "{\"event\":\"recover_router\",\"success\":" + (ok ? "true" : "false") + "}"
-            );
+            mqttClient.publishEvent(std::string("{\"event\":\"recover_router\",\"success\":") + (ok ? "true" : "false") + "}");
         } else if (commandStr == "ota_update") {
             std::string url = doc["url"].as<std::string>();
             std::string version = doc["version"].as<std::string>();
@@ -156,7 +138,7 @@ static void handleDevicePoll() {
             newCount++;
 
             mqttClient.publishEvent(
-                "{\"event\":\"new_device\",\"mac\":\"" + dev.mac + "\",\"hostname\":\"" + dev.hostname + "\"}"
+                std::string("{\"event\":\"new_device\",\"mac\":\"") + dev.mac + "\",\"hostname\":\"" + dev.hostname + "\"}"
             );
         } else {
             auto existing = deviceRegistry.getDevice(dev.mac);
@@ -182,7 +164,7 @@ static void handleDevicePoll() {
         std::string alertJson;
         serializeJson(arr, alertJson);
         mqttClient.publishAlert(
-            "{\"alert\":\"unregistered_devices\",\"count\":" + String(unregistered.size()) + ",\"devices\":" + alertJson.c_str() + "}"
+            std::string("{\"alert\":\"unregistered_devices\",\"count\":") + std::to_string(unregistered.size()) + ",\"devices\":" + alertJson + "}"
         );
     }
 }
@@ -209,7 +191,7 @@ static void handlePolicyCheck() {
     std::string eventJson;
     serializeJson(arr, eventJson);
     mqttClient.publishEvent(
-        "{\"event\":\"policy_applied\",\"success\":" + (success ? "true" : "false") + ",\"actions\":" + eventJson + "}"
+        std::string("{\"event\":\"policy_applied\",\"success\":") + (success ? "true" : "false") + ",\"actions\":" + eventJson + "}"
     );
 }
 
@@ -277,7 +259,7 @@ void setup() {
             case TamperEvent::EMO_OFFLINE: eventName = "emo_offline"; break;
         }
         mqttClient.publishAlert(
-            "{\"alert\":\"" + String(eventName) + "\",\"detail\":\"" + detail.c_str() + "\"}"
+            std::string("{\"alert\":\"") + eventName + "\",\"detail\":\"" + detail + "\"}"
         );
     });
 
@@ -285,12 +267,12 @@ void setup() {
         [](int progress, int total) {
             int pct = (total > 0) ? (progress * 100 / total) : 0;
             mqttClient.publishEvent(
-                "{\"event\":\"ota_progress\",\"progress\":" + String(pct) + "}"
+                std::string("{\"event\":\"ota_progress\",\"progress\":") + std::to_string(pct) + "}"
             );
         },
         [](bool success, const std::string& message) {
             mqttClient.publishEvent(
-                "{\"event\":\"ota_result\",\"success\":" + String(success ? "true" : "false") + ",\"message\":\"" + message.c_str() + "\"}"
+                std::string("{\"event\":\"ota_result\",\"success\":") + (success ? "true" : "false") + ",\"message\":\"" + message + "\"}"
             );
         }
     );

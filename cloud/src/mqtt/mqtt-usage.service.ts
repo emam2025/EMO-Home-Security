@@ -44,7 +44,10 @@ export class MqttUsageService {
         });
       }
     } catch (error) {
-      console.warn('Ignoring malformed usage report:', error.message);
+      console.warn(
+        'Ignoring malformed usage report:',
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 }

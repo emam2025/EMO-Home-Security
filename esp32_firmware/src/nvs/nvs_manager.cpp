@@ -76,5 +76,6 @@ void NvsManager::clear() {
 
 bool NvsManager::commit() {
     if (!initialized_) return false;
-    return prefs_.end();
+    prefs_.end();
+    return true;
 }
