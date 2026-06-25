@@ -84,4 +84,4 @@ emo-home-security/
 
 ## License
 
-MIT
+All Rights Reserved © Eng.Emam AbdullAziz
