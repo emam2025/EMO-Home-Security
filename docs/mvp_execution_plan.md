@@ -1,53 +1,53 @@
-# خطة تنفيذ MVP — 8 أسابيع
+# MVP Execution Plan — 8 Weeks
 
 > EMO Family Internet Manager
 > Realistic plan to reach a home-testable MVP
 
 ---
 
-## Milestone 0 — Project Foundation (3–4 أيام)
+## Milestone 0 — Project Foundation (3–4 Days)
 
-**الهدف:** تجهيز بيئة التطوير والبنية الأساسية.
+**Goal:** Set up development environment and basic infrastructure.
 
-| المهمة | التفاصيل |
+| Task | Details |
 |---|---|
-| **Repository Setup** | إنشاء هيكل المشروع: `Firmware/`, `Backend/`, `Mobile/`, `Docs/` |
+| **Repository Setup** | Create project structure: `Firmware/`, `Backend/`, `Mobile/`, `Docs/` |
 | **Infrastructure** | GitHub repo, Docker Compose (PostgreSQL + EMQX + Redis), CI/CD via GitHub Actions (lint, unit tests, build verification) |
 
-**الناتج:**
-- ✅ مشروع منظم
-- ✅ بيئات التطوير جاهزة
+**Deliverables:**
+- ✅ Organized project
+- ✅ Development environments ready
 
 ---
 
-## Milestone 1 — Cloud Core (الأسبوع الأول)
+## Milestone 1 — Cloud Core (Week 1)
 
-**الهدف:** بناء Backend أساسي.
+**Goal:** Build a basic Backend.
 
 ### Backend
-| المهمة | النقاط الفرعية |
+| Task | Sub-tasks |
 |---|---|
 | **Authentication** | Register, Login, JWT, Refresh Token |
-| **Database** | الجداول الأساسية: `users`, `homes`, `profiles`, `devices`, `routers` |
-| **MQTT** | إعداد EMQX, TLS, تعريف Topics |
+| **Database** | Core tables: `users`, `homes`, `profiles`, `devices`, `routers` |
+| **MQTT** | Set up EMQX, TLS, Define Topics |
 
-**الناتج:**
-- ✅ مستخدم يستطيع إنشاء حساب
-- ✅ قاعدة بيانات جاهزة
-- ✅ MQTT Broker يعمل
+**Deliverables:**
+- ✅ User can create an account
+- ✅ Database ready
+- ✅ MQTT Broker running
 
 ---
 
-## Milestone 2 — ESP32 Connectivity (الأسبوع الثاني)
+## Milestone 2 — ESP32 Connectivity (Week 2)
 
-**الهدف:** ربط ESP32 بالسحابة.
+**Goal:** Connect ESP32 to the cloud.
 
 ### Firmware
-| المهمة | التفاصيل |
+| Task | Details |
 |---|---|
 | **WiFi / Ethernet** | Connect, Reconnect, Heartbeat |
 | **MQTT** | Publish, Subscribe, TLS |
-| **Device Registration** | أول تشغيل: ESP32 → Register Device → Cloud |
+| **Device Registration** | First run: ESP32 → Register Device → Cloud |
 
 ### Topics
 | Topic | Direction |
@@ -56,98 +56,98 @@
 | `emo/{deviceId}/events` | Device → Cloud |
 | `emo/{deviceId}/commands` | Cloud → Device |
 
-**الناتج:**
-- ✅ ESP32 يظهر Online
-- ✅ Heartbeat كل 30 ثانية
+**Deliverables:**
+- ✅ ESP32 shows Online
+- ✅ Heartbeat every 30 seconds
 
 ---
 
-## Milestone 3 — Router Driver V1 (الأسبوع الثالث)
+## Milestone 3 — Router Driver V1 (Week 3)
 
-**الهدف:** دعم أول راوتر فقط.
+**Goal:** Support only the first router.
 
-### الراوتر المستهدف
+### Target Router
 Huawei HG8145V5
 
-### بناء
-| المكون | الوظائف |
+### Build
+| Component | Functions |
 |---|---|
-| `IRouterDriver` | الواجهة الأساسية |
-| التنفيذ | `login()`, `getDevices()`, `blockDevice()`, `unblockDevice()`, `setDNS()` |
+| `IRouterDriver` | Basic interface |
+| Implementation | `login()`, `getDevices()`, `blockDevice()`, `unblockDevice()`, `setDNS()` |
 
-### اختبار
+### Testing
 - Read Device List
 - Block Device
 - Unblock Device
 
-**الناتج:**
-- ✅ تحكم فعلي بالراوتر
+**Deliverables:**
+- ✅ Actual router control
 
 ---
 
-## Milestone 4 — Device Discovery (الأسبوع الرابع)
+## Milestone 4 — Device Discovery (Week 4)
 
-**الهدف:** اكتشاف الأجهزة وإدارتها.
+**Goal:** Discover and manage devices.
 
 ### Firmware
-- Polling: كل 60 ثانية
+- Polling: every 60 seconds
 
 ### Backend
 - Endpoints: `GET /devices`, `POST /assign-profile`
 
 ### App
-- شاشة: Connected Devices
+- Screen: Connected Devices
 
-**الناتج:**
-- ✅ رؤية الأجهزة المتصلة
-- ✅ ربط الجهاز بمستخدم
+**Deliverables:**
+- ✅ View connected devices
+- ✅ Link device to user
 
 ---
 
-## Milestone 5 — User Profiles & Quotas (الأسبوع الخامس)
+## Milestone 5 — User Profiles & Quotas (Week 5)
 
-**الهدف:** تطبيق نظام المستخدمين.
+**Goal:** Implement the user system.
 
-| المجال | العناصر |
+| Domain | Elements |
 |---|---|
 | **Profiles** | Father, Mother, Ahmed, Mariam |
-| **Policies** | Monthly Quota لكل ملف |
+| **Policies** | Monthly Quota per Profile |
 | **Backend** | `quota_rules`, `usage_logs` |
 | **App** | Profile Screen |
 
-**الناتج:**
-- ✅ إنشاء ملفات شخصية
-- ✅ ربط أجهزة بكل مستخدم
+**Deliverables:**
+- ✅ Create personal profiles
+- ✅ Link devices to each user
 
 ---
 
-## Milestone 6 — Scheduling Engine (الأسبوع السادس)
+## Milestone 6 — Scheduling Engine (Week 6)
 
-**الهدف:** التحكم الزمني.
+**Goal:** Time-based control.
 
 ### Rules
-مثال: Ahmed — 4 PM → 10 PM
+Example: Ahmed — 4 PM → 10 PM
 
 ### Firmware
-- كل دقيقة: Check Schedule → Block / Unblock
+- Every minute: Check Schedule → Block / Unblock
 
-**الناتج:**
-- ✅ الإنترنت يعمل ضمن أوقات محددة
+**Deliverables:**
+- ✅ Internet works within specified times
 
 ---
 
-## Milestone 7 — Parent Dashboard (الأسبوع السابع)
+## Milestone 7 — Parent Dashboard (Week 7)
 
-**الهدف:** واجهة تشغيل حقيقية.
+**Goal:** Real operational interface.
 
 ### Flutter
-| الشاشة | العناصر |
+| Screen | Elements |
 |---|---|
-| **Dashboard** | نظرة عامة |
-| **Devices** | قائمة الأجهزة |
-| **Profiles** | إدارة الملفات الشخصية |
-| **Usage** | الاستهلاك |
-| **Status** | حالة الجهاز والراوتر |
+| **Dashboard** | Overview |
+| **Devices** | Device list |
+| **Profiles** | Profile management |
+| **Usage** | Consumption |
+| **Status** | Device and router status |
 
 ### Actions
 - Pause Internet
@@ -160,31 +160,31 @@ Huawei HG8145V5
 - Offline Device
 - Quota Exhausted
 
-**الناتج:**
-- ✅ تطبيق قابل للاستخدام
+**Deliverables:**
+- ✅ Usable application
 
 ---
 
-## Milestone 8 — Security & Hardening (الأسبوع الثامن)
+## Milestone 8 — Security & Hardening (Week 8)
 
-**الهدف:** تثبيت النظام للاختبار المنزلي.
+**Goal:** Stabilize the system for home testing.
 
-| المجال | التفاصيل |
+| Domain | Details |
 |---|---|
-| **Tamper Detection** | اكتشاف: Router Restart, Router Reset, EMO Offline |
+| **Tamper Detection** | Detect: Router Restart, Router Reset, EMO Offline |
 | **Recovery** | Router Fingerprint, Credential Recovery, Policy Reapply |
 | **OTA** | Firmware Update |
 
-**الناتج:**
-- ✅ MVP مستقر
-- ✅ جاهز للاختبار المنزلي
+**Deliverables:**
+- ✅ Stable MVP
+- ✅ Ready for home testing
 
 ---
 
-## ما يتم تأجيله بعد MVP
+## Post-MVP Deferrals
 
 ### Phase 2
-- ❌ تعدد الراوترات
+- ❌ Multiple routers
 - ❌ DNS Timeline
 - ❌ Advanced Analytics
 - ❌ Child Portal
@@ -198,18 +198,18 @@ Huawei HG8145V5
 
 ---
 
-## تعريف النجاح الحقيقي للـ MVP
+## True MVP Success Definition
 
-> إذا استطعت تنفيذ السيناريو التالي بالكامل:
+> If you can fully execute the following scenario:
 
-1. الأب يفتح التطبيق
-2. يرى الأجهزة المتصلة
-3. ينشئ "أحمد"
-4. يربط جهاز أحمد
-5. يحدد: 30 GB, 4 PM → 10 PM
-6. يضغط Save
-7. EMO يطبق السياسة على الراوتر
-8. عند 10 PM يتم إيقاف الإنترنت تلقائيًا
-9. الأب يرى الحالة من خارج المنزل
+1. The father opens the app
+2. He sees the connected devices
+3. He creates "Ahmed"
+4. He links Ahmed's device
+5. He sets: 30 GB, 4 PM → 10 PM
+6. He presses Save
+7. EMO applies the policy to the router
+8. At 10 PM, internet is automatically stopped
+9. The father sees the status from outside the home
 
-**فقد حققت MVP ناجحًا وقابلًا للتجربة مع المستخدمين الحقيقيين قبل أي توسعات أخرى.**
+**Then you have achieved a successful MVP ready for testing with real users before any further expansions.**

@@ -210,8 +210,8 @@ Router Model Supported: **🟢 Huawei HG8145V5 Only** (MVP compliant – no supp
 ### Critical 🔴 (Immediate Fix Required)
 
 01. **MQTT Pure Text Fallback**
-    - **Risk:** Если MQTT_BROKER_URL لا 8883 header المشفرة `→` MITM
-    - **Location:** جسم `./cloud/src/mqtt/mqtt.service.ts` initialization line 29
+    - **Risk:** MQTT_BROKER_URL does not enforce TLS port 8883 → MITM
+    - **Location:** Body of `./cloud/src/mqtt/mqtt.service.ts` initialization line 29
     - **Evidence:** 
       ```typescript
       @Injectable()
@@ -233,7 +233,7 @@ Router Model Supported: **🟢 Huawei HG8145V5 Only** (MVP compliant – no supp
     - **Location:** `./esp32_firmware/src/credential_manager.cpp:67-88`
     - **Evidence:**
       ```cpp
-      // ❌ تخزين مشفر ضعيف (AES128-CCM حجم ثابت 16B IV + 32B data)
+      // ❌ Weak encrypted storage (AES128-CCM fixed size 16B IV + 32B data)
       nvs_set_blob("router", "pass", buffer, 64);
       ```
     - **Fix:** Transition to `nvs_sec_cert storage API` esp-idf + rotate IV each boot  
@@ -258,7 +258,7 @@ Router Model Supported: **🟢 Huawei HG8145V5 Only** (MVP compliant – no supp
     - **Severity:** 🔴 Critical
 
 05. **Router Driver Session Persistence**
-    - **Risk:**ESP32 يستعمل `HTTPCookie` Padre on router login → إذا لم `clearcookies()` → جلسات متداخلة  
+    - **Risk:** ESP32 uses `HTTPCookie` on router login → if it doesn't `clearcookies()` → nested sessions  
     - **Location:** `./esp32_firmware/src/huawei_hg8145v5_driver.cpp:101`  
     - **Fix:** Add explicit logout every loop (simplify)
     - **Severity:** 🟡 Medium
@@ -274,7 +274,7 @@ Router Model Supported: **🟢 Huawei HG8145V5 Only** (MVP compliant – no supp
     - **Evidence:** `<input>` widgets auto-sanitised by Flutter Engine ✅ Safe 
 
 08. **DNS Rebinding Vulnerability**  
-    - **Risk:** Cloud service hosted on dynamic DNS → أساء الى MITM  
+    - **Risk:** Cloud service hosted on dynamic DNS → leads to MITM  
     - **Location:** `./cloud/src/app.module.ts:45` NO dyn-DNS used (static config) ✅ Safe
 
 ---
@@ -282,17 +282,17 @@ Router Model Supported: **🟢 Huawei HG8145V5 Only** (MVP compliant – no supp
 ## ⚠️ WARNINGS 🟡 (Future Phase Note)
 
 09. **UsageLogventures without bandwidth data**  
-    - Current router HG8145V5 **لاتدعم byte counter**  
+    - Current router HG8145V5 **does not support byte counter**  
     - **Workaround:** ESP32 sends `onlineStatus` list – Usage App показывает 0 bytes
     - **Future fix:** Move to router driver with SNMP v2 or switch to OpenWRT + iptables accounting
 
 10. **Heartbeat Noise**  
-    - ESP32 MQTT publishes `emo/{deviceId}/status` كل 30´s → ~3MB/مuser/year  
+    - ESP32 MQTT publishes `emo/{deviceId}/status` every 30s → ~3MB/user/year  
     - **Suggestion:** Move heartbeat to 300´s or echo message ID + QoS 0 to reduce traffic
 
 11. **Profile Switch Attack**  
-    - **Risk:** Child profile قد يزعم جهاز آخر → parents ثم لايكون جدوله  
-    - **Fix:** Transactional commit + locking on same MAC assignment → قبالة concurrentEdit SQL race
+    - **Risk:** Child profile may claim another device → parents then won't have their schedule  
+    - **Fix:** Transactional commit + locking on same MAC assignment → prevent concurrentEdit SQL race
 
 12. **ESP32 Factory Credentials Storage**  
     - Router fallback creds hardcoded in firmware (40B in `Ethernet.h`)  
@@ -327,14 +327,14 @@ Router Model Supported: **🟢 Huawei HG8145V5 Only** (MVP compliant – no supp
 ## 📊 Bottlenecks Identified  
 
 ### 01. **Cloud /usage Historical Query Slow**  
-- **Issue:** `/usage?homeId=1&start=...&end=...` 조회 과거 90 days → ~2.5K rows → Prisma selects all fields → كل 2MB JSON payload  
+- **Issue:** `/usage?homeId=1&start=...&end=...` query past 90 days → ~2.5K rows → Prisma selects all fields → ~2MB JSON payload  
 - **Impact:** User waits 6-8´s on /usage screen render  
 - **Fix:**  
   ```prisma
   model UsageLog {
     id        Int @id @default(autoincrement())
     timestamp DateTime @default(now())
-    bytes     Int  //تراف Nanjing + or 6/8 bits
+    bytes     Int  // traffic Nanjing + or 6/8 bits
     // Remove macAddress raw save reference to network_device.id instead = int FK
   }
   ```

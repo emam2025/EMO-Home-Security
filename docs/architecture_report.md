@@ -1,360 +1,360 @@
-**تقرير معماري شامل – مشروع EMO (مدير الإنترنت العائلي)**  
-**إعداد: فريق التطوير**  
-**النسخة: 1.0**
+# EMO Family Internet Manager — Architecture Report  
+**Prepared by: Development Team**  
+**Version: 1.0**
 
 ---
 
-## 1. ملخص المشروع
+## 1. Project Summary
 
-**EMO (Family Internet Manager)** هو نظام متكامل من ثلاث طبقات لإدارة الإنترنت المنزلي:  
-**جهاز ESP32 (الطبقة الميدانية) ← سحابة خلفية (NestJS) ← تطبيق ولي الأمر (Flutter)**.
+**EMO (Family Internet Manager)** is a comprehensive three-layer home internet management system:  
+**ESP32 Device (Field Layer) ← Cloud Backend (NestJS) ← Parent App (Flutter)**.
 
-يتيح النظام لولي الأمر إنشاء **ملفات تعريف رقمية** للأبناء، وتحديد **أوقات تصفح مسموح بها**، و**حصة بيانات يومية/شهرية**، وحظر الأجهزة غير المرغوب فيها عبر التحكم بجهاز التوجيه (Router) مباشرة عبر واجهة HTTP الداخلية للراوتر.  
+The system enables parents to create **digital profiles** for children, set **allowed browsing time windows**, **daily/monthly data quotas**, and block unwanted devices by controlling the router directly via its internal HTTP interface.  
 
-> **مبدأ أساسي**: ESP32 يعمل كـ **وكيل تحكم فقط** (Router Control Agent) – لا يعترض حركة المرور، لا يقوم بفحص الحزم، لا يقيس عرض الحزمة.
+> **Core Principle**: ESP32 acts as a **Router Control Agent only** — it does not intercept traffic, inspect packets, or measure bandwidth.
 
 ---
 
-## 2. الهيكل العام للنظام (Three-Tier Architecture)
+## 2. System Overview (Three-Tier Architecture)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                      📱 تطبيق ولي الأمر (Flutter)                    │
-│  شاشات: لوحة التحكم، الملفات، الأجهزة، الاستخدام، الإشعارات، الإعدادات │
-│  خدمات: API Client, Auth Service, WebSocket Service                  │
-│  مقدمي البيانات: AuthProvider, HomeProvider                          │
+│                      📱 Parent App (Flutter)                         │
+│  Screens: Dashboard, Profiles, Devices, Usage, Notifications, Settings │
+│  Services: API Client, Auth Service, WebSocket Service               │
+│  Providers: AuthProvider, HomeProvider                               │
 └───────────────────────────┬─────────────────────────────────────────┘
-                            │ HTTPS / WebSocket
-                            ▼
+                             │ HTTPS / WebSocket
+                             ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    ☁️ السحابة الخلفية (NestJS + PostgreSQL)           │
-│  REST API (v1) │ MQTT Client │ JWT Auth │ Prisma ORM │ WebSocket     │
-│  وحدات: Auth, Homes, Profiles, Devices, NetworkDevices,              │
-│         Quotas, Schedules, Usage, Notifications, Routers, MQTT       │
+│                    ☁️ Cloud Backend (NestJS + PostgreSQL)            │
+│  REST API (v1) │ MQTT Client │ JWT Auth │ Prisma ORM │ WebSocket    │
+│  Modules: Auth, Homes, Profiles, Devices, NetworkDevices,            │
+│          Quotas, Schedules, Usage, Notifications, Routers, MQTT      │
 └───────────────────────────┬─────────────────────────────────────────┘
-                            │ MQTT (TLS 8883)
-                            ▼
+                             │ MQTT (TLS 8883)
+                             ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│             📟 جهاز التحكم (ESP32 – ESP32 Dev Kit)                  │
-│  NetworkManager (Ethernet W5500 + WiFi Fallback)                     │
-│  MqttClient (TLS, Heartbeat 30s, Last-Will)                         │
-│  RouterDriver (Huawei HG8145V5 – HTTP API)                          │
-│  PolicyEngine (جدولة + حصة بيانات)                                   │
-│  TamperDetector (مراقبة صحة الراوتر)                                 │
-│  CredentialManager (تخزين آمن لبيانات الراوتر)                       │
-│  OtaUpdater (تحديث البرامج الثابتة عبر الهواء)                       │
+│             📟 Control Device (ESP32 – ESP32 Dev Kit)               │
+│  NetworkManager (Ethernet W5500 + WiFi Fallback)                    │
+│  MqttClient (TLS, Heartbeat 30s, Last-Will)                        │
+│  RouterDriver (Huawei HG8145V5 – HTTP API)                         │
+│  PolicyEngine (Scheduling + Data Quota)                            │
+│  TamperDetector (Router Health Monitoring)                          │
+│  CredentialManager (Secure Router Credential Storage)              │
+│  OtaUpdater (Over-the-Air Firmware Updates)                         │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 3. مكونات النظام بالتفصيل
+## 3. System Components in Detail
 
-### 3.1 جهاز ESP32 – الطبقة الميدانية
+### 3.1 ESP32 Device — Field Layer
 
-**اللغة**: C++ (Arduino Framework)  
-**بيئة التطوير**: PlatformIO  
-**المعالج**: ESP32 (ESP-WROOM-32)  
-**الذاكرة الوميضية**: 8MB (مقسمة لـ OTA)  
-**الاتصال بالشبكة**:  
-- Ethernet (W5500 SPI) – الخيار المفضل  
-- WiFi (2.4 GHz) – خيار احتياطي مع تجاوز تلقائي (Failover)  
+**Language**: C++ (Arduino Framework)  
+**Development Environment**: PlatformIO  
+**Processor**: ESP32 (ESP-WROOM-32)  
+**Flash Memory**: 8MB (Partitioned for OTA)  
+**Network Connectivity**:  
+- Ethernet (W5500 SPI) – Preferred option  
+- WiFi (2.4 GHz) – Backup option with automatic failover  
 
-#### الوحدات البرمجية:
+#### Software Modules:
 
-| الوحدة | الملفات | الوظيفة |
+| Module | Files | Function |
 |--------|---------|----------|
-| **NetworkManager** | `network_manager.h/cpp` | إدارة اتصال الشبكة (Ethernet/WiFi مع Failover، ping صحي) |
-| **MqttClient** | `mqtt_client.h/cpp` | اتصال MQTT (TLS، Heartbeat 30 ثانية، إعادة اتصال تصاعدية، Last-Will) |
-| **HuaweiHG8145V5Driver** | `huawei_hg8145v5_driver.h/cpp` | واجهة تحكم براوتر Huawei HG8145V5 (جلب الأجهزة، حظر، DNS، Whitelist) |
-| **DeviceRegistry** | `device_registry.h/cpp` | إدارة تسجيل الجهاز، توليد ID، تخزين NVS |
-| **PolicyEngine** | `policy_engine.h/cpp` | تطبيق سياسات الجدولة والحصة اليومية بناءً على ملفات التعريف |
-| **NvsManager** | `nvs_manager.h/cpp` | طبقة تجريد لـ Preferences (تخزين key-value) |
-| **TamperDetector** | `tamper_detector.h/cpp` | مراقبة صحة الراوتر (فشل الدخول، إعادة التشغيل، انقطاع MQTT) |
-| **CredentialManager** | `credential_manager.h/cpp` | تخزين آمن لبيانات اعتماد الراوتر في NVS |
-| **OtaUpdater** | `ota_updater.h/cpp` | تحديث البرامج الثابتة عبر الهواء (OTA) |
+| **NetworkManager** | `network_manager.h/cpp` | Network connection management (Ethernet/WiFi with Failover, health ping) |
+| **MqttClient** | `mqtt_client.h/cpp` | MQTT connection (TLS, 30s Heartbeat, exponential backoff reconnection, Last-Will) |
+| **HuaweiHG8145V5Driver** | `huawei_hg8145v5_driver.h/cpp` | Huawei HG8145V5 router control interface (device fetch, block, DNS, Whitelist) |
+| **DeviceRegistry** | `device_registry.h/cpp` | Device registration management, ID generation, NVS storage |
+| **PolicyEngine** | `policy_engine.h/cpp` | Schedule and daily quota policy enforcement based on profiles |
+| **NvsManager** | `nvs_manager.h/cpp` | Abstraction layer for Preferences (key-value storage) |
+| **TamperDetector** | `tamper_detector.h/cpp` | Router health monitoring (login failure, restart, MQTT disconnection) |
+| **CredentialManager** | `credential_manager.h/cpp` | Secure storage of router credentials in NVS |
+| **OtaUpdater** | `ota_updater.h/cpp` | Over-the-air firmware updates |
 
-#### دورة التشغيل الرئيسية (`main.cpp`):
-
-```
-Boot → NVS init → تحميل بيانات اعتماد الراوتر → 
-اتصال بالشبكة → اتصال MQTT → ← تسجيل الجهاز (أول مرة) → 
-حلقة لا نهائية (كل 10-50ms):
-  • NetworkManager.loop() – صيانة اتصال الشبكة
-  • MqttClient.loop() + heartbeat() – صيانة MQTT
-  • handleDevicePoll() – جلب أجهزة الراوتر كل 60 ثانية
-  • handlePolicyCheck() – تطبيق السياسات كل 60 ثانية
-  • handleUsageReport() – إرسال تقرير الاستخدام كل 5 دقائق
-  • tamperDetector.loop() – مراقبة الصحة كل 10 ثوانٍ
-  • otaUpdater.loop() – متابعة تحديث OTA
-```
-
-#### بروتوكول MQTT – المواضيع (Topics):
+#### Main Loop (`main.cpp`):
 
 ```
-emo/{deviceId}/status      ← نبض الحياة (30s)، retains
-emo/{deviceId}/events      ← أحداث (حظر، تفعيل، تحديث)
-emo/{deviceId}/alerts      ← إنذارات (عبث، انقطاع)
-emo/{deviceId}/usage       ← تقرير الاستخدام (5min)
-emo/{deviceId}/commands    → أوامر من السحابة (حظر، فتح، تحديث بيانات، OTA)
-emo/{deviceId}/policies    → سياسات من السحابة (ملفات تعريف محدثة)
-emo/register               → تسجيل الجهاز (أول مرة)
+Boot → NVS init → Load router credentials → 
+Network connect → MQTT connect → ← Device registration (first time) → 
+Infinite loop (every 10-50ms):
+  • NetworkManager.loop() – Maintain network connection
+  • MqttClient.loop() + heartbeat() – Maintain MQTT
+  • handleDevicePoll() – Fetch router devices every 60s
+  • handlePolicyCheck() – Apply policies every 60s
+  • handleUsageReport() – Send usage report every 5min
+  • tamperDetector.loop() – Health monitoring every 10s
+  • otaUpdater.loop() – Track OTA update
+```
+
+#### MQTT Protocol — Topics:
+
+```
+emo/{deviceId}/status      ← Heartbeat (30s), retains
+emo/{deviceId}/events      ← Events (block, activate, update)
+emo/{deviceId}/alerts      ← Alerts (tamper, disconnection)
+emo/{deviceId}/usage       ← Usage report (5min)
+emo/{deviceId}/commands    → Commands from cloud (block, unblock, data update, OTA)
+emo/{deviceId}/policies    → Policies from cloud (updated profiles)
+emo/register               → Device registration (first time)
 ```
 
 ---
 
-### 3.2 السحابة الخلفية – Cloud Backend
+### 3.2 Cloud Backend
 
-**الإطار**: NestJS (TypeScript)  
-**قاعدة البيانات**: PostgreSQL مع Prisma ORM  
-**الوسيط الرسائلي**: MQTT (EMQX أو أي broker متوافق)  
-**المصادقة**: JWT (Access + Refresh Token)  
-**التوثيق**: ValidationPipe + class-validator على جميع DTOs  
+**Framework**: NestJS (TypeScript)  
+**Database**: PostgreSQL with Prisma ORM  
+**Message Broker**: MQTT (EMQX or compatible broker)  
+**Authentication**: JWT (Access + Refresh Token)  
+**Validation**: ValidationPipe + class-validator on all DTOs  
 
-#### نموذج البيانات (14 جدولاً):
+#### Data Model (14 Tables):
 
 ```
-User ──┬── Home (المسكن)
+User ──┬── Home
         │
-Home ──┬── HomeMember (أعضاء المسكن)
-       ├── Profile (ملف تعريف – طفل)
-       ├── Router (جهاز التوجيه)
-       ├── Device (جهاز EMO – ESP32 مسجل)
-       └── NetworkDevice (أجهزة الشبكة المنزلية)
+Home ──┬── HomeMember
+       ├── Profile
+       ├── Router
+       ├── Device
+       └── NetworkDevice
 
-Profile ──┬── QuotaRule (حصة البيانات)
-           ├── Schedule (جدول الأوقات – JSON: activeDays + timeSlots)
-           └── UsageLog (سجل الاستخدام)
+Profile ──┬── QuotaRule
+          ├── Schedule (JSON: activeDays + timeSlots)
+          └── UsageLog
 
-Notification (إشعارات للمستخدم)
-Event (أحداث النظام)
-Policy (سياسات من السحابة)
+Notification
+Event
+Policy
 ```
 
-#### وحدات الـ REST API (17 Controller):
+#### REST API Modules (17 Controllers):
 
-| الوحدة | المسار (Prefix) | الوظيفة |
+| Module | Path (Prefix) | Function |
 |--------|-----------------|----------|
-| **Auth** | `/auth` | تسجيل، دخول، تحديث التوكن |
-| **Users** | `/users` | إدارة المستخدمين |
-| **Homes** | `/homes` | إدارة المساكن (CRUD + pause/resume + أعضاء) |
-| **Profiles** | `/homes/:homeId/profiles` | إدارة ملفات التعريف (CRUD) |
-| **Devices** | `/homes/:homeId/devices` | أجهزة EMO المسجلة (قراءة فقط) |
-| **NetworkDevices** | `/homes/:homeId/network-devices` | أجهزة الشبكة (قراءة + اعتماد/حظر/تعيين ملف) |
-| **Routers** | `/routers` | أجهزة التوجيه (CRUD) |
-| **Quotas** | `/homes/:homeId/quotas` | حصص البيانات (قراءة + تحديث) |
-| **Schedules** | `/homes/:homeId/schedules` | جداول الأوقات (قراءة + تحديث) |
-| **Usage** | `/homes/:homeId/usage` | إحصائيات الاستخدام (تراكمي + تاريخي) |
-| **Notifications** | `/homes/:homeId/notifications` | الإشعارات (قراءة + تعيين كمقروء) |
-| **Alerts** | `/homes/:homeId/alerts` | الإنذارات |
-| **Mqtt** | `/mqtt` | نقطة نهاية لاختبار MQTT |
+| **Auth** | `/auth` | Register, Login, Token Refresh |
+| **Users** | `/users` | User Management |
+| **Homes** | `/homes` | Home Management (CRUD + pause/resume + Members) |
+| **Profiles** | `/homes/:homeId/profiles` | Profile Management (CRUD) |
+| **Devices** | `/homes/:homeId/devices` | Registered EMO Devices (Read Only) |
+| **NetworkDevices** | `/homes/:homeId/network-devices` | Network Devices (Read + Approve/Block/Assign Profile) |
+| **Routers** | `/routers` | Router Management (CRUD) |
+| **Quotas** | `/homes/:homeId/quotas` | Data Quotas (Read + Update) |
+| **Schedules** | `/homes/:homeId/schedules` | Time Schedules (Read + Update) |
+| **Usage** | `/homes/:homeId/usage` | Usage Statistics (Cumulative + Historical) |
+| **Notifications** | `/homes/:homeId/notifications` | Notifications (Read + Mark Read) |
+| **Alerts** | `/homes/:homeId/alerts` | Alerts |
+| **Mqtt** | `/mqtt` | MQTT Test Endpoint |
 
-#### خدمات MQTT:
+#### MQTT Services:
 
-| الخدمة | الوظيفة |
+| Service | Function |
 |--------|---------|
-| **MqttService** | إدارة اتصال MQTT (اشتراك، نشر، معالجة الرسائل) |
-| **MqttUsageService** | استقبال تقارير الاستخدام من EMO، تخزين في UsageLog |
+| **MqttService** | MQTT Connection Management (Subscribe, Publish, Message Handling) |
+| **MqttUsageService** | Receive Usage Reports from EMO, Store in UsageLog |
 
 ---
 
-### 3.3 تطبيق ولي الأمر – Flutter
+### 3.3 Parent App — Flutter
 
-**اللغة**: Dart  
-**الإطار**: Flutter مع Provider  
-**المكتبات الرئيسية**: http, flutter_secure_storage, web_socket_channel  
+**Language**: Dart  
+**Framework**: Flutter with Provider  
+**Key Libraries**: http, flutter_secure_storage, web_socket_channel  
 
-#### الشاشات (7 شاشات):
+#### Screens (7 Screens):
 
-| الشاشة | المسار | الوظيفة |
+| Screen | Route | Function |
 |--------|--------|---------|
-| **LoginScreen** | `/login` | تسجيل الدخول |
-| **DashboardScreen** | `/dashboard` | لوحة التحكم الرئيسية (بطاقات ملخص + تبويب سفلي) |
-| **ProfilesScreen** | `/profiles` | قائمة ملفات التعريف |
-| **ProfileDetailScreen** | `/profile_detail` | تفاصيل ملف تعريف (جداول + حصة) |
-| **DevicesScreen** | `/devices` | أجهزة الشبكة مع إمكانية الاعتماد/الحظر |
-| **UsageScreen** | `/usage` | إحصائيات الاستخدام لكل ملف |
-| **NotificationsScreen** | `/notifications` | قائمة الإشعارات مع إمكانية تعيين كمقروء |
+| **LoginScreen** | `/login` | Login |
+| **DashboardScreen** | `/dashboard` | Main Dashboard (Summary Cards + Bottom Navigation) |
+| **ProfilesScreen** | `/profiles` | Profile List |
+| **ProfileDetailScreen** | `/profile_detail` | Profile Detail (Schedules + Quotas) |
+| **DevicesScreen** | `/devices` | Network Devices with Approve/Block |
+| **UsageScreen** | `/usage` | Usage Statistics per Profile |
+| **NotificationsScreen** | `/notifications` | Notification List with Mark as Read |
 
-#### مقدمي البيانات (Providers):
+#### Providers:
 
-| المزود | الوظيفة |
+| Provider | Function |
 |--------|---------|
-| **AuthProvider** | إدارة حالة المصادقة (تسجيل، دخول، خروج) |
-| **HomeProvider** | إدارة كامل بيانات المسكن (ملفات، أجهزة، جداول، إشعارات) مع تحديثات WebSocket |
+| **AuthProvider** | Authentication State Management (Register, Login, Logout) |
+| **HomeProvider** | Complete Home Data Management (Profiles, Devices, Schedules, Notifications) with WebSocket Updates |
 
-#### الخدمات:
+#### Services:
 
-| الخدمة | الوظيفة |
+| Service | Function |
 |--------|---------|
-| **ApiClient** | عميل HTTP مع تحديث JKT تلقائي (Refresh Token) |
-| **AuthService** | عمليات المصادقة |
-| **WebSocketService** | اتصال WebSocket للتحديثات اللحظية (حالة الأجهزة، أجهزة جديدة، إنذارات) |
+| **ApiClient** | HTTP Client with Auto JWT Refresh (Refresh Token) |
+| **AuthService** | Authentication Operations |
+| **WebSocketService** | WebSocket Connection for Real-time Updates (Device Status, New Devices, Alerts) |
 
 ---
 
-## 4. تدفق البيانات – السيناريوهات الرئيسية
+## 4. Data Flow — Main Scenarios
 
-### 4.1 التسجيل الأولي لجهاز EMO
-
-```
-ESP32 (أول تشغيل) → NVS: لا يوجد device_id → توليد device_id و pairing_code  
-  → اتصال MQTT → نشر {device_id, mac, pairing_code, firmware_version} إلى emo/register  
-  → Cloud: استلام الرسالة → تحديث جدول Device → ربط مع Home  
-  → (استجابة مباشرة لا توجد – التطبيق يقرأ حالة الجهاز عبر الـ REST API)
-  → ESP32: تخزين registered=true في NVS
-  → (توقف عن إرسال التسجيل في التشغيلات اللاحقة)
-```
-
-### 4.2 دورة السياسات (جدول + حصة)
+### 4.1 Initial EMO Device Registration
 
 ```
-Cloud (مدير المشروع) → تحديث Schedule أو QuotaRule لملف تعريف  
-  → نشر سياسة إلى emo/{deviceId}/policies  
-  → ESP32: استلام → PolicyEngine.updatePolicies() → تحديث البيانات المحلية  
-  → كل 60 ثانية: PolicyEngine.evaluate() →  
-    • التحقق من الوقت الحالي (isInAllowedWindow)  
-    • التحقق من الحصة (isQuotaExhausted)  
-    • إذا انتهت الحصة أو خارج الوقت المسموح → blockDevice(mac) للجهاز المخالف  
-  → نشر حدث {blocked_device, mac} إلى emo/{deviceId}/events
+ESP32 (first boot) → NVS: no device_id → Generate device_id and pairing_code  
+  → MQTT connect → Publish {device_id, mac, pairing_code, firmware_version} to emo/register  
+  → Cloud: Receive message → Update Device table → Link to Home  
+  → (No direct response – app reads device status via REST API)
+  → ESP32: Store registered=true in NVS
+  → (Stop sending registration on subsequent boots)
 ```
 
-### 4.3 حظر/اعتماد جهاز شبكة من التطبيق
+### 4.2 Policy Cycle (Schedule + Quota)
 
 ```
-Flutter (ولي الأمر) → POST /homes/{homeId}/network-devices/{id}/block  
-  → Cloud: تحديث حالة الجهاز في قاعدة البيانات  
-  → Cloud: نشر أمر block_device إلى emo/{deviceId}/commands  
-  → ESP32: استلام → routerDriver.blockDevice(mac)  
-  → ESP32: نشر حدث {event:block_device, mac, success:true} إلى emo/{deviceId}/events  
-  → Cloud: استلام الحدث → (اختياري: إنشاء إشعار)
+Cloud (parent) → Update Schedule or QuotaRule for a profile  
+  → Publish policy to emo/{deviceId}/policies  
+  → ESP32: Receive → PolicyEngine.updatePolicies() → Update local data  
+  → Every 60s: PolicyEngine.evaluate() →  
+    • Check current time (isInAllowedWindow)  
+    • Check quota (isQuotaExhausted)  
+    • If quota exhausted or outside allowed time → blockDevice(mac) for violating device  
+  → Publish event {blocked_device, mac} to emo/{deviceId}/events
 ```
 
-### 4.4 تقرير الاستخدام
+### 4.3 Block/Approve Network Device from App
 
 ```
-ESP32 (كل 5 دقائق) → جلب قائمة الأجهزة من الراوتر  
-  → تجميع: timestamp, onlineDevices, لكل جهاز {mac, ip, hostname, online}  
-  → نشر إلى emo/{deviceId}/usage  
-  → Cloud MqttUsageService: استلام →  
-    • إيجاد NetworkDevice بواسطة MAC  
-    • إنشاء UsageLog مع profileId ← networkDeviceId  
-    • (bytesDownloaded/Uploaded = 0 مؤقتاً لحين توفر راوتر يدعم قياس عرض الحزمة)
+Flutter (parent) → POST /homes/{homeId}/network-devices/{id}/block  
+  → Cloud: Update device status in database  
+  → Cloud: Publish block_device command to emo/{deviceId}/commands  
+  → ESP32: Receive → routerDriver.blockDevice(mac)  
+  → ESP32: Publish event {event:block_device, mac, success:true} to emo/{deviceId}/events  
+  → Cloud: Receive event → (Optional: create notification)
 ```
 
-### 4.5 الكشف عن العبث (Tamper Detection)
+### 4.4 Usage Report
 
 ```
-ESP32 TamperDetector.loop() (كل 10 ثوانٍ):
-  • مراقبة فشل دخول الراوتر → بعد 3 محاولات فاشلة → إنذار router_credentials_failed
-  • مراقبة وقت تشغيل الراوتر (uptime) → إذا قل فجأة → إنذار router_restarted
-  • مراقبة اتصال MQTT → إذا انقطع لأكثر من 60 ثانية → إنذار mqtt_connection_lost
-  • نشر الإنذار إلى emo/{deviceId}/alerts
-  • Cloud: استقبال → إنشاء إشعار لولي الأمر
+ESP32 (every 5 minutes) → Fetch device list from router  
+  → Aggregate: timestamp, onlineDevices, per device {mac, ip, hostname, online}  
+  → Publish to emo/{deviceId}/usage  
+  → Cloud MqttUsageService: Receive →  
+    • Find NetworkDevice by MAC  
+    • Create UsageLog with profileId ← networkDeviceId  
+    • (bytesDownloaded/Uploaded = 0 temporarily until a router supporting bandwidth measurement is available)
+```
+
+### 4.5 Tamper Detection
+
+```
+ESP32 TamperDetector.loop() (every 10 seconds):
+  • Monitor router login failure → after 3 failed attempts → alert router_credentials_failed
+  • Monitor router uptime → if suddenly drops → alert router_restarted
+  • Monitor MQTT connection → if disconnected for more than 60s → alert mqtt_connection_lost
+  • Publish alert to emo/{deviceId}/alerts
+  • Cloud: Receive → create notification for parent
 ```
 
 ---
 
-## 5. البنية التحتية والنشر
+## 5. Infrastructure and Deployment
 
-### الحاويات (Docker Compose):
+### Containers (Docker Compose):
 
-| الخدمة | الصورة | الدور |
+| Service | Image | Role |
 |--------|--------|-------|
-| **PostgreSQL** | postgres:15 | قاعدة البيانات |
-| **Redis** | redis:7-alpine | تخزين مؤقت للجلسات (مستقبلاً) |
-| **EMQX** | emqx:5 | وسيط MQTT |
+| **PostgreSQL** | postgres:15 | Database |
+| **Redis** | redis:7-alpine | Session cache (future) |
+| **EMQX** | emqx:5 | MQTT Broker |
 
-### النشر:
+### Deployment:
 
 ```
-cloud/ (NestJS) → Build → Docker Image → Deploy إلى أي سحابة (Render, Railway, Fly.io)
-esp32_firmware/ → PlatformIO Build → Flash عبر USB أو OTA
-flutter_app/ → Flutter Build → APK/IPA → متجر التطبيقات
+cloud/ (NestJS) → Build → Docker Image → Deploy to any cloud (Render, Railway, Fly.io)
+esp32_firmware/ → PlatformIO Build → Flash via USB or OTA
+flutter_app/ → Flutter Build → APK/IPA → App Store
 ```
 
-### خط CI/CD (GitHub Actions):
+### CI/CD Pipeline (GitHub Actions):
 
-- اختبار وتجميع Cloud (`pnpm build && pnpm test`)
-- فحص الجودة (ESLint)
-- نشر Flutter Web (اختياري)
+- Cloud build and test (`pnpm build && pnpm test`)
+- Code quality check (ESLint)
+- Flutter Web deploy (optional)
 
 ---
 
-## 6. حالة الإنجاز حسب المراحل (Milestones)
+## 6. Milestone Completion Status
 
-| المرحلة | الحالة | المكونات |
+| Milestone | Status | Components |
 |---------|--------|----------|
-| **M0 – التأسيس** | ✅ مكتمل | هيكل المشروع، Docker Compose، CI/CD |
-| **M1 – السحابة الأساسية** | ✅ مكتمل | Auth (JWT)، 14 نموذج Prisma، 17 Controller، MQTT، 7 اختبارات وحدة |
-| **M2 – اتصال ESP32** | ✅ مكتمل | NetworkManager، MqttClient (TLS)، التسجيل، IRouterDriver، NVS |
-| **M3 – مشغل الراوتر** | ✅ مكتمل | Huawei HG8145V5 كامل (10 دوال: login, block, whitelist, statistics...) |
-| **M4 – اكتشاف الأجهزة** | ✅ مكتمل | DevicePoll (60s)، نشر إلى السحابة |
-| **M5 – ملفات التعريف والحصص** | ✅ مكتمل | CRUD Profiles + Quotas مع تطبيق على ESP32 |
-| **M6 – محرك الجدولة** | ✅ مكتمل | جداول أوقات متعددة (JSON)، تنفيذ على ESP32 |
-| **M7 – لوحة ولي الأمر** | ✅ مكتمل | 7 شاشات Flutter، WebSocket، API Client |
-| **M8 – الأمان والحماية** | ✅ مكتمل | TamperDetector، CredentialManager، OTA، تقسيم ذاكرة OTA |
+| **M0 – Foundation** | ✅ Complete | Project structure, Docker Compose, CI/CD |
+| **M1 – Core Cloud** | ✅ Complete | Auth (JWT), 14 Prisma models, 17 Controllers, MQTT, 7 unit tests |
+| **M2 – ESP32 Connectivity** | ✅ Complete | NetworkManager, MqttClient (TLS), Registration, IRouterDriver, NVS |
+| **M3 – Router Driver** | ✅ Complete | Full Huawei HG8145V5 (10 functions: login, block, whitelist, statistics...) |
+| **M4 – Device Discovery** | ✅ Complete | DevicePoll (60s), Publish to cloud |
+| **M5 – Profiles and Quotas** | ✅ Complete | CRUD Profiles + Quotas with ESP32 enforcement |
+| **M6 – Schedule Engine** | ✅ Complete | Multiple time schedules (JSON), ESP32 execution |
+| **M7 – Parent Dashboard** | ✅ Complete | 7 Flutter screens, WebSocket, API Client |
+| **M8 – Security and Hardening** | ✅ Complete | TamperDetector, CredentialManager, OTA, OTA memory partitioning |
 
-> **جميع المراحل مكتملة** – المشروع جاهز للتطبيق الميداني والتجارب مع راوتر حقيقي.
+> **All milestones complete** – The project is ready for field application and testing with a real router.
 
 ---
 
-## 7. القرارات التقنية الرئيسية
+## 7. Key Technical Decisions
 
-| القرار | البديل المطروح | الاختيار | السبب |
+| Decision | Alternatives Considered | Choice | Reason |
 |--------|---------------|----------|-------|
-| لغة ESP32 | MicroPython, ESP-IDF | **Arduino (C++)** | سرعة تطوير أعلى، مكتبات جاهزة للـ MQTT والـ Ethernet |
-| إطار السحابة | Express, Fastify | **NestJS** | هيكل منظم، حقن التبعية، توثيق DTO مدمج |
-| ORM | TypeORM, Knex | **Prisma** | توليد تلقائي للأنواع، هجرة آمنة، أدوات استعلام قوية |
-| واجهة الراوتر | SNMP, Telnet | **HTTP API** | سهولة التكامل مع Huawei HG8145V5 (يدعم CGI فقط) |
-| تخزين بيانات الراوتر | نص عادي، Hardware Key | **NVS (Preferences)** | مدمج في ESP32، آمن، سهل الاستخدام |
-| نقل البيانات | REST polling, gRPC | **MQTT** | خفيف، يدعم Last-Will، اشتراك/نشر (pub/sub) |
-| إدارة الحالة في Flutter | Bloc, Riverpod, GetX | **Provider** | بسيط، مدعوم رسمياً، مناسب لحجم التطبيق |
-| تنسيق الجدول الزمني | عدة صفوف (Normalized) | **JSON (activeDays + timeSlots)** | مرونة عالية، استعلام واحد، يدعم أوقات متعددة وأيام متعددة |
+| ESP32 Language | MicroPython, ESP-IDF | **Arduino (C++)** | Faster development, ready libraries for MQTT and Ethernet |
+| Cloud Framework | Express, Fastify | **NestJS** | Structured architecture, dependency injection, built-in DTO validation |
+| ORM | TypeORM, Knex | **Prisma** | Auto-generated types, safe migrations, powerful query tools |
+| Router Interface | SNMP, Telnet | **HTTP API** | Easy integration with Huawei HG8145V5 (only supports CGI) |
+| Router Data Storage | Plain text, Hardware Key | **NVS (Preferences)** | Built into ESP32, secure, easy to use |
+| Data Transport | REST polling, gRPC | **MQTT** | Lightweight, supports Last-Will, publish/subscribe |
+| Flutter State Management | Bloc, Riverpod, GetX | **Provider** | Simple, officially supported, appropriate for app size |
+| Schedule Format | Multiple rows (Normalized) | **JSON (activeDays + timeSlots)** | High flexibility, single query, supports multiple times and days |
 
 ---
 
-## 8. المبادئ والقواعد غير القابلة للتفاوض
+## 8. Non-Negotiable Principles and Rules
 
-1. **ESP32 ليس Gateway** – لا يعترض حركة المرور، لا يفحص الحزم، لا يقيس عرض الحزمة  
-2. **كل فترات الانتظار غير حاجبة** – `millis()` فقط، لا `delay()`  
-3. **جميع DTOs موثقة بـ class-validator**  
-4. **MQTT دائمًا TLS على المنفذ 8883**  
-5. **مواضيع MQTT تتبع النمط `emo/{deviceId}/{type}`**  
-6. **رسوم Mermaid البيانية هي المعيار للتوثيق**  
-7. **جميع أسماء الحقول في JSON بـ snake_case**  
-8. **مهما حدث – لا ننتقل إلى Router Proxy/Gateway** (هذا خارج نطاق MVP)
+1. **ESP32 is not a Gateway** – It does not intercept traffic, inspect packets, or measure bandwidth  
+2. **All waiting periods are non-blocking** – `millis()` only, no `delay()`  
+3. **All DTOs validated with class-validator**  
+4. **MQTT always TLS on port 8883**  
+5. **MQTT topics follow the pattern `emo/{deviceId}/{type}`**  
+6. **Mermaid diagrams are the documentation standard**  
+7. **All JSON field names use snake_case**  
+8. **No matter what – do not move to Router Proxy/Gateway** (this is outside MVP scope)
 
 ---
 
-## 9. الخريطة الزمنية – إجمالي الجهد
+## 9. Timeline — Total Effort
 
-| النشاط | الجهد المقدر | الجهد المستغرق |
+| Activity | Estimated Effort | Actual Effort |
 |--------|-------------|----------------|
-| التأسيس (M0) | 1 يوم | 1 يوم |
-| السحابة الأساسية (M1) | 3 أيام | 3 أيام |
-| اتصال ESP32 + السائق (M2+M3) | 3 أيام | 3 أيام |
-| اكتشاف الأجهزة + ملفات التعريف (M4+M5) | 3 أيام | 3 أيام |
-| الجدولة + لوحة التحكم (M6+M7) | 4 أيام | 4 أيام |
-| الأمان والحماية (M8) | 2 يوم | 2 يوم |
-| **المجموع** | **16 يوماً** | **16 يوماً** |
+| Foundation (M0) | 1 day | 1 day |
+| Core Cloud (M1) | 3 days | 3 days |
+| ESP32 Connection + Driver (M2+M3) | 3 days | 3 days |
+| Device Discovery + Profiles (M4+M5) | 3 days | 3 days |
+| Scheduling + Dashboard (M6+M7) | 4 days | 4 days |
+| Security and Hardening (M8) | 2 days | 2 days |
+| **Total** | **16 days** | **16 days** |
 
-> جميع المراحل التسليمية مكتملة. المشروع جاهز للاختبار الميداني.
+> All delivery milestones complete. The project is ready for field testing.
 
 ---
 
-## 10. الملفات المرجعية الهامة
+## 10. Important Reference Files
 
-| الملف | الأهمية |
+| File | Importance |
 |-------|---------|
-| `cloud/prisma/schema.prisma` | تعريف كامل لنموذج البيانات (14 جدول) |
-| `cloud/src/main.ts` | نقطة دخول السحابة (منفذ 3000، CORS، ValidationPipe) |
-| `esp32_firmware/src/main.cpp` | دورة التشغيل الرئيسية لـ ESP32 |
-| `flutter_app/lib/main.dart` | نقطة دخول التطبيق مع المسارات |
-| `docs/system_architecture.md` | رسم العمارة المحدث |
-| `docs/mvp_execution_plan.md` | خطة التنفيذ بالتفصيل |
-| `docs/non_goals.md` | وثيقة خارج النطاق – **ضرورية لتجنب زحف المتطلبات** |
+| `cloud/prisma/schema.prisma` | Complete data model definition (14 tables) |
+| `cloud/src/main.ts` | Cloud entry point (port 3000, CORS, ValidationPipe) |
+| `esp32_firmware/src/main.cpp` | ESP32 main execution loop |
+| `flutter_app/lib/main.dart` | App entry point with routes |
+| `docs/system_architecture.md` | Updated architecture diagram |
+| `docs/mvp_execution_plan.md` | Detailed execution plan |
+| `docs/non_goals.md` | Out-of-scope document – **essential to avoid scope creep** |
 
 ---
 
-*نهاية التقرير – جميع المراحل مكتملة، المشروع جاهز للتطبيق الميداني.*
+*End of report – all milestones complete, project ready for field deployment.*

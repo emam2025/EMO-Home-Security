@@ -1,78 +1,78 @@
 # EMO Family Internet Manager
-## قائمة تحقق التنفيذ (Execution Checklist)
-**النسخة: 1.0** | **الحالة: جميع المراحل مكتملة ✅**
+## Execution Checklist
+**Version: 1.0** | **Status: All Phases Complete ✅**
 
 ---
 
-## 📋 قواعد القائمة
-- ✅ = مكتمل ومختبر
-- ❌ = غير مكتمل
-- ⚠️ = مكتمل جزئيًا
-- **المطلوب:** جميع البنود يجب أن تكون ✅ قبل اعتبار المرحلة مكتملة
+## Checklist Rules
+- ✅ = Complete and tested
+- ❌ = Incomplete
+- ⚠️ = Partially complete
+- **Required:** All items must be ✅ before the phase is considered complete
 
 ---
 
-## 🎯 المرحلة 1: تأسيس البنية الأساسية
+## Phase 1: Foundation Setup
 
-### 1.1 Repository منظم
-- [x] هيكل المجلدات النهائي (cloud/ + esp32_firmware/ + flutter_app/ + docs/)
-- [x] ملف `.gitignore` مناسب لكل طبقة
-- [x] ترخيص المشروع (LICENSE)
-- [x] ملف README.md الرئيسي
+### 1.1 Repository Organization
+- [x] Final folder structure (cloud/ + esp32_firmware/ + flutter_app/ + docs/)
+- [x] Appropriate `.gitignore` for each layer
+- [x] Project license (LICENSE)
+- [x] Main README.md file
 
 ### 1.2 Cloud Backend Setup
-- [x] مشروع NestJS مهيأ
-- [x] package.json مع جميع التبعيات
-- [x] tsconfig.json تكوين صحيح
-- [x] هيكل المجلدات (src/, prisma/, test/)
+- [x] NestJS project configured
+- [x] package.json with all dependencies
+- [x] tsconfig.json correct configuration
+- [x] Folder structure (src/, prisma/, test/)
 
-### 1.3 قاعدة البيانات PostgreSQL
-- [x] Docker Compose لPostgreSQL
-- [x] Prisma schema مهيأ
-- [x] هجرات أولية (migrations)
-- [x] اتصال قاعدة البيانات يعمل
+### 1.3 PostgreSQL Database
+- [x] Docker Compose for PostgreSQL
+- [x] Prisma schema configured
+- [x] Initial migrations
+- [x] Database connection working
 
 ### 1.4 MQTT Broker
-- [x] Docker Compose لEMQX
-- [x] تكوين MQTT (TLS 8883)
-- [x] اختبار اتصال MQTT
+- [x] Docker Compose for EMQX
+- [x] MQTT configuration (TLS 8883)
+- [x] MQTT connection test
 
 ### 1.5 Flutter App Skeleton
-- [x] مشروع Flutter مهيأ
-- [x] pubspec.yaml مع التبعيات
-- [x] هيكل المجلدات (lib/, assets/, test/)
-- [x] ملف main.dart أساسي
+- [x] Flutter project configured
+- [x] pubspec.yaml with dependencies
+- [x] Folder structure (lib/, assets/, test/)
+- [x] Basic main.dart file
 
 ### 1.6 ESP32 Firmware Skeleton
-- [x] مشروع PlatformIO مهيأ
-- [x] platformio.ini مع التكوين
-- [x] ملف main.cpp أساسي
-- [x] مكتبات مطلوبة (WiFi, Ethernet, MQTT, etc.)
+- [x] PlatformIO project configured
+- [x] platformio.ini with configuration
+- [x] Basic main.cpp file
+- [x] Required libraries (WiFi, Ethernet, MQTT, etc.)
 
 ### 1.7 CI/CD
 - [x] GitHub Actions workflow
-- [x] اختبار وتجميع Cloud
-- [x] فحص الجودة (ESLint)
+- [x] Cloud build and test
+- [x] Code quality check (ESLint)
 
-### 1.8 ملفات البيئة
-- [x] .env.example للCloud
-- [x] .env.example لFlutter
-- [x] configuration.h لESP32
+### 1.8 Environment Files
+- [x] .env.example for Cloud
+- [x] .env.example for Flutter
+- [x] configuration.h for ESP32
 
-**✅ المرحلة 1: مكتملة**
+**✅ Phase 1: Complete**
 
 ---
 
-## 🖥️ المرحلة 2: السحابة الأساسية
+## Phase 2: Core Cloud
 
 ### 2.1 Authentication System
-- [x] AuthModule في NestJS
-- [x] تسجيل المستخدم (register)
-- [x] تسجيل الدخول (login)
+- [x] AuthModule in NestJS
+- [x] User registration
+- [x] User login
 - [x] JWT Access Token
 - [x] JWT Refresh Token
-- [x] حماية المسارات (Guards)
-- [x] ValidationPipe عالمي
+- [x] Route protection (Guards)
+- [x] Global ValidationPipe
 
 ### 2.2 Users Module
 - [x] UsersController
@@ -89,22 +89,22 @@
 
 ### 2.4 HomeMembers Module
 - [x] HomeMember entity
-- [x] ربط المستخدمين بالمساكن
-- [x] إدارة أعضاء المسكن
+- [x] Link users to homes
+- [x] Manage home members
 
 ### 2.5 Profiles Module
 - [x] ProfilesController
 - [x] ProfilesService
 - [x] Profile entity
 - [x] CRUD operations
-- [x] ربط الملفات بالمساكن
+- [x] Link profiles to homes
 
 ### 2.6 Devices Module
 - [x] DevicesController
 - [x] DevicesService
 - [x] Device entity (ESP32 devices)
-- [x] تسجيل الأجهزة
-- [x] قراءة بيانات الأجهزة
+- [x] Device registration
+- [x] Device data read
 
 ### 2.7 NetworkDevices Module
 - [x] NetworkDevicesController
@@ -112,121 +112,121 @@
 - [x] NetworkDevice entity
 - [x] CRUD operations
 - [x] block/unblock functionality
-- [x] ربط بالأجهزة الشخصية
+- [x] Link to personal devices
 
 ### 2.8 Routers Module
 - [x] RoutersController
 - [x] RoutersService
 - [x] Router entity
 - [x] CRUD operations
-- [x] تخزين بيانات الراوتر
+- [x] Store router data
 
 ### 2.9 QuotaRules Module
 - [x] QuotaRulesController
 - [x] QuotaRulesService
 - [x] QuotaRule entity
 - [x] CRUD operations
-- [x] ربط بالملفات الشخصية
+- [x] Link to profiles
 
 ### 2.10 Schedules Module
 - [x] SchedulesController
 - [x] SchedulesService
 - [x] Schedule entity (JSON format)
 - [x] CRUD operations
-- [x] ربط بالملفات الشخصية
+- [x] Link to profiles
 
 ### 2.11 UsageLogs Module
 - [x] UsageLogsController
 - [x] UsageLogsService
 - [x] UsageLog entity
-- [x] تسجيل استخدام الأجهزة
-- [x] استعلامات إحصائية
+- [x] Record device usage
+- [x] Statistical queries
 
 ### 2.12 Notifications Module
 - [x] NotificationsController
 - [x] NotificationsService
 - [x] Notification entity
 - [x] CRUD operations
-- [x] تعيين كمقروء
+- [x] Mark as read
 
 ### 2.13 Alerts Module
 - [x] AlertsController
 - [x] AlertsService
 - [x] Alert entity
-- [x] تسجيل الإنذارات
-- [x] ربط بالأجهزة
+- [x] Record alerts
+- [x] Link to devices
 
 ### 2.14 Policies Module
 - [x] PoliciesController
 - [x] PoliciesService
 - [x] Policy entity
-- [x] نشر السياسات إلى ESP32
+- [x] Publish policies to ESP32
 
 ### 2.15 MQTT Integration
 - [x] MqttModule
 - [x] MqttService
-- [x] اتصال MQTT مع TLS
-- [x] اشتراك في المواضيع
-- [x] نشر الرسائل
+- [x] MQTT connection with TLS
+- [x] Topic subscription
+- [x] Message publishing
 - [x] MqttUsageService
 
 ### 2.16 WebSocket Integration
 - [x] WebSocket Gateway
-- [x] التحديثات اللحظية للتطبيق
-- [x] اشتراك في الأحداث
+- [x] Real-time app updates
+- [x] Event subscription
 
-**✅ المرحلة 2: مكتملة**
+**✅ Phase 2: Complete**
 
 ---
 
-## 📡 المرحلة 3: ESP32 Connectivity
+## Phase 3: ESP32 Connectivity
 
 ### 3.1 Network Management
 - [x] NetworkManager class
 - [x] Ethernet (W5500) support
 - [x] WiFi fallback
 - [x] Failover logic
-- [x] اتصال بالشبكة
-- [x] ping صحي
+- [x] Network connection
+- [x] Health ping
 
 ### 3.2 MQTT Client
 - [x] MqttClient class
-- [x] اتصال MQTT مع TLS
-- [x] Heartbeat كل 30 ثانية
+- [x] MQTT connection with TLS
+- [x] Heartbeat every 30 seconds
 - [x] Last-Will message
-- [x] إعادة اتصال تصاعدية
-- [x] اشتراك في المواضيع
-- [x] نشر الرسائل
+- [x] Exponential backoff reconnection
+- [x] Topic subscription
+- [x] Message publishing
 
 ### 3.3 Device Registration
 - [x] DeviceRegistry class
-- [x] توليد device_id
-- [x] توليد pairing_code
-- [x] تسجيل الجهاز مع السحابة
-- [x] تخزين الحالة في NVS
+- [x] Generate device_id
+- [x] Generate pairing_code
+- [x] Register device with cloud
+- [x] Store state in NVS
 
 ### 3.4 Secure Storage
 - [x] NvsManager class
-- [x] تخزين key-value
+- [x] Key-value storage
 - [x] CredentialManager
-- [x] تشفير بيانات الراوتر
+- [x] Encrypt router data
 
 ### 3.5 Local State Persistence
-- [x] تخزين حالة الاتصال
-- [x] تخزين سياسات محليًا
-- [x] استعادة الحالة بعد restart
+- [x] Store connection state
+- [x] Store policies locally
+- [x] Restore state after restart
 
 ### 3.6 OTA Groundwork
 - [x] OtaUpdater class
-- [x] قسم ذاكرة OTA
-- [x] استلام تحديثات
-- [x] تطبيق التحديث
+- [x] OTA memory partition
+- [x] Receive updates
+- [x] Apply update
 
-**✅ المرحلة 3: مكتملة**
+**✅ Phase 3: Complete**
 
 ---
 
-## 🔌 المرحلة 4: Router Driver v1
+## Phase 4: Router Driver v1
 
 ### 4.1 Router Abstraction
 - [x] IRouterDriver interface
@@ -253,221 +253,221 @@
 - [x] rebootRouter() implementation
 
 ### 4.3 Testing
-- [x] اختبار على راوتر حقيقي
-- [x] حفظ credentials
-- [x] حفظ router fingerprint
+- [x] Test on real router
+- [x] Save credentials
+- [x] Save router fingerprint
 
-**✅ المرحلة 4: مكتملة**
+**✅ Phase 4: Complete**
 
 ---
 
-## 🔍 المرحلة 5: Device Discovery
+## Phase 5: Device Discovery
 
 ### 5.1 Device Polling
 - [x] handleDevicePoll() function
-- [x] استدعاء كل 60 ثانية
-- [x] جلب قائمة الأجهزة من الراوتر
-- [x] تجميع بيانات الأجهزة
+- [x] Call every 60 seconds
+- [x] Fetch device list from router
+- [x] Aggregate device data
 
 ### 5.2 Database Representation
 - [x] NetworkDevice entity
-- [x] تخزين MAC, IP, hostname
-- [x] تتبع حالة الاتصال
+- [x] Store MAC, IP, hostname
+- [x] Track connection status
 
 ### 5.3 Profile Assignment
-- [x] ربط الأجهزة بالملفات الشخصية
-- [x] API endpoint لربط الأجهزة
-- [x] عرض الأجهزة في التطبيق
+- [x] Link devices to profiles
+- [x] API endpoint for device linking
+- [x] Display devices in app
 
 ### 5.4 Cloud Sync
-- [x] نشر تحديثات الجهاز
-- [x] استلام تحديثات من ESP32
-- [x] مزامنة حالة الأجهزة
+- [x] Publish device updates
+- [x] Receive updates from ESP32
+- [x] Sync device status
 
-**✅ المرحلة 5: مكتملة**
+**✅ Phase 5: Complete**
 
 ---
 
-## 💾 المرحلة 6: Quota Engine
+## Phase 6: Quota Engine
 
 ### 6.1 Quota Definition
 - [x] QuotaRule entity
 - [x] daily quota
 - [x] monthly quota
-- [x] ربط بالملفات الشخصية
+- [x] Link to profiles
 
 ### 6.2 Quota Calculation
-- [x] حساب المتبقي
-- [x] إعادة التعيين اليومي/الشهري
-- [x] تخزين حالة الكوتة
+- [x] Calculate remaining
+- [x] Daily/monthly reset
+- [x] Store quota state
 
 ### 6.3 Local Enforcement
 - [x] PolicyEngine class
 - [x] isQuotaExhausted()
-- [x] تطبيق block عند انتهاء الحصة
-- [x] تخزين الحالة محليًا
+- [x] Apply block on exhaustion
+- [x] Store state locally
 
 ### 6.4 Cloud Sync
-- [x] مزامنة الكوتة مع السحابة
-- [x] تحديث الحالة في الوقت الفعلي
-- [x] إرسال alerts عند التجاوز
+- [x] Sync quota with cloud
+- [x] Real-time status updates
+- [x] Send alerts on exhaustion
 
-**✅ المرحلة 6: مكتملة**
+**✅ Phase 6: Complete**
 
 ---
 
-## ⏰ المرحلة 7: Schedule Engine
+## Phase 7: Schedule Engine
 
 ### 7.1 Schedule Definition
 - [x] Schedule entity
 - [x] activeDays (JSON array)
 - [x] timeSlots (JSON array)
-- [x] ربط بالملفات الشخصية
+- [x] Link to profiles
 
 ### 7.2 Time-Based Blocking
 - [x] isInAllowedWindow()
-- [x] تطبيق حظر خارج الأوقات المسموح بها
-- [x] مزامنة الجداول مع ESP32
+- [x] Apply block outside allowed times
+- [x] Sync schedules with ESP32
 
 ### 7.3 Integration
-- [x] دمج الجدولة مع quota rules
-- [x] عرض الوقت المتبقي
-- [x] تحديث الحالة في التطبيق
+- [x] Merge scheduling with quota rules
+- [x] Show remaining time
+- [x] Update status in app
 
-**✅ المرحلة 7: مكتملة**
+**✅ Phase 7: Complete**
 
 ---
 
-## 📱 المرحلة 8: Parent Dashboard
+## Phase 8: Parent Dashboard
 
 ### 8.1 Authentication Screens
 - [x] LoginScreen
-- [x] تسجيل الدخول
-- [x] تسجيل الخروج
-- [x] حفظ التوكن
+- [x] Login
+- [x] Logout
+- [x] Save token
 
 ### 8.2 Dashboard Screen
 - [x] DashboardScreen
-- [x] بطاقات ملخص
-- [x] تبويب سفلي
-- [x] عرض حالة النظام
+- [x] Summary cards
+- [x] Bottom navigation
+- [x] System status display
 
 ### 8.3 Profile Management
 - [x] ProfilesScreen
 - [x] ProfileDetailScreen
 - [x] CRUD operations
-- [x] عرض الجداول
-- [x] عرض الكوتة
+- [x] Display schedules
+- [x] Display quota
 
 ### 8.4 Device Management
 - [x] DevicesScreen
-- [x] عرض قائمة الأجهزة
-- [x] اعتماد/حظر الأجهزة
-- [x] ربط بالأجهزة الشخصية
+- [x] Display device list
+- [x] Approve/block devices
+- [x] Link to personal devices
 
 ### 8.5 Quota & Schedule Management
 - [x] Quota editing
 - [x] Schedule editing
-- [x] عرض الإحصائيات
+- [x] Display statistics
 
 ### 8.6 Notifications & Alerts
 - [x] NotificationsScreen
-- [x] عرض الإشعارات
-- [x] عرض الإنذارات
-- [x] تعيين كمقروء
+- [x] Display notifications
+- [x] Display alerts
+- [x] Mark as read
 
 ### 8.7 Router Status
-- [x] عرض حالة الراوتر
-- [x] عرض حالة ESP32
-- [x] عرض الأجهزة المتصلة
+- [x] Display router status
+- [x] Display ESP32 status
+- [x] Display connected devices
 
 ### 8.8 Remote Actions
-- [x] أزرار block/unblock
-- [x] أزرار pause/resume
-- [x] أزرار extend time
+- [x] Block/unblock buttons
+- [x] Pause/resume buttons
+- [x] Extend time buttons
 
 ### 8.9 Real-Time Updates
 - [x] WebSocket Service
-- [x] تحديثات لحظية
-- [x] مزامنة مع السحابة
+- [x] Real-time updates
+- [x] Cloud sync
 
-**✅ المرحلة 8: مكتملة**
+**✅ Phase 8: Complete**
 
 ---
 
-## 🔒 المرحلة 9: Security & Recovery
+## Phase 9: Security & Recovery
 
 ### 9.1 Credential Security
-- [x] تشفير بيانات الراوتر
+- [x] Encrypt router data
 - [x] CredentialManager
-- [x] تخزين آمن في NVS
+- [x] Secure storage in NVS
 
 ### 9.2 Tamper Detection
 - [x] TamperDetector class
-- [x] مراقبة فشل دخول الراوتر
-- [x] مراقبة restart الراوتر
-- [x] مراقبة انقطاع MQTT
+- [x] Monitor router login failure
+- [x] Monitor router restart
+- [x] Monitor MQTT disconnection
 
 ### 9.3 Recovery Behavior
-- [x] محاولة الاستعادة بالـ credentials المخزنة
-- [x] fallback إلى factory credentials
-- [x] إعادة تطبيق السياسات
-- [x] إرسال alerts عند الفشل
+- [x] Attempt recovery with stored credentials
+- [x] Fallback to factory credentials
+- [x] Reapply policies
+- [x] Send alerts on failure
 
 ### 9.4 OTA Updates
 - [x] OtaUpdater class
-- [x] استلام التحديثات
-- [x] تطبيق التحديث
-- [x] التحقق من التحديث
+- [x] Receive updates
+- [x] Apply update
+- [x] Verify update
 
-**✅ المرحلة 9: مكتملة**
-
----
-
-## ✅ معيار القبول النهائي للـ MVP
-
-### السيناريو الكامل:
-- [x] الأب يسجل الدخول من خارج المنزل
-- [x] الأب يرى الأجهزة والملفات الشخصية
-- [x] الأب ينشئ profile
-- [x] الأب يربط جهازًا بملف
-- [x] الأب يحدد quota
-- [x] الأب يحدد schedule
-- [x] ESP32 يطبق السياسة على الراوتر
-- [x] التطبيق يعكس الحالة فورًا
-- [x] النظام يرسل alert عند التجاوز
-- [x] النظام يستعيد السياسة بعد restart
-- [x] النظام يستعيد السياسة بعد tamper
-
-**✅ جميع معيار القبول محقق**
+**✅ Phase 9: Complete**
 
 ---
 
-## 📊 ملخص الحالة
+## Final MVP Acceptance Criteria
 
-| **المرحلة** | **الحالة** | **ملاحظات** |
+### Full Scenario:
+- [x] Father logs in from outside the home
+- [x] Father sees devices and profiles
+- [x] Father creates a profile
+- [x] Father links a device to a profile
+- [x] Father sets quota
+- [x] Father sets schedule
+- [x] ESP32 applies policy to router
+- [x] App reflects status immediately
+- [x] System sends alert on exhaustion
+- [x] System recovers policy after restart
+- [x] System recovers policy after tamper
+
+**✅ All acceptance criteria met**
+
+---
+
+## Summary Status
+
+| **Phase** | **Status** | **Notes** |
 |-------------|------------|--------------|
-| المرحلة 1: التأسيس | ✅ مكتملة | جميع العناصر مهيأة |
-| المرحلة 2: السحابة | ✅ مكتملة | 17 Controller + MQTT + WebSocket |
-| المرحلة 3: ESP32 Connectivity | ✅ مكتملة | Network + MQTT + OTA |
-| المرحلة 4: Router Driver | ✅ مكتملة | Huawei HG8145V5 مكتمل |
-| المرحلة 5: Device Discovery | ✅ مكتملة | Polling + Sync |
-| المرحلة 6: Quota Engine | ✅ مكتملة | PolicyEngine + UsageLog |
-| المرحلة 7: Schedule Engine | ✅ مكتملة | Time-based blocking |
-| المرحلة 8: Dashboard | ✅ مكتملة | 7 شاشات + WebSocket |
-| المرحلة 9: Security | ✅ مكتملة | Tamper + OTA + Encryption |
+| Phase 1: Foundation | ✅ Complete | All elements configured |
+| Phase 2: Cloud | ✅ Complete | 17 Controller + MQTT + WebSocket |
+| Phase 3: ESP32 Connectivity | ✅ Complete | Network + MQTT + OTA |
+| Phase 4: Router Driver | ✅ Complete | Huawei HG8145V5 complete |
+| Phase 5: Device Discovery | ✅ Complete | Polling + Sync |
+| Phase 6: Quota Engine | ✅ Complete | PolicyEngine + UsageLog |
+| Phase 7: Schedule Engine | ✅ Complete | Time-based blocking |
+| Phase 8: Dashboard | ✅ Complete | 7 screens + WebSocket |
+| Phase 9: Security | ✅ Complete | Tamper + OTA + Encryption |
 
-**🎉 المشروع مكتمل بنسبة 100%**
+**Project 100% Complete**
 
 ---
 
-## 📝 سجل التحديثات
+## Changelog
 
-| **التاريخ** | **التحديث** | **المسؤول** |
+| **Date** | **Update** | **Author** |
 |-------------|-------------|-------------|
-| 2026-06-25 | إنشاء قائمة التحقق | opencode |
-| 2026-06-25 | تأكيد اكتمال جميع المراحل | opencode |
+| 2026-06-25 | Created checklist | opencode |
+| 2026-06-25 | Confirmed all phases complete | opencode |
 
 ---
 
-*آخر تحديث: 25 يونيو 2026*
+*Last updated: June 25, 2026*

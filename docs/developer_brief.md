@@ -73,7 +73,7 @@ ESP32 → MQTT/TLS → Cloud Backend → Flutter App
 - Device list and approval
 - Quota and schedule editing
 - Alerts and usage visibility
-- Remote actions from خارج المنزل
+- Remote actions from outside the home
 
 ---
 

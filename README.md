@@ -1,6 +1,6 @@
 # EMO — Family Internet Manager
 
-> جهاز ذكي منخفض التكلفة لإدارة الإنترنت المنزلي للعائلات — تحكم، مراقبة، حماية.
+> Low-cost smart device for family home internet management — Control, Monitor, Protect.
 
 ![Status](https://img.shields.io/badge/status-MVP-blue)
 ![Platform](https://img.shields.io/badge/platform-ESP32%20%7C%20NestJS%20%7C%20Flutter-green)
