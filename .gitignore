@@ -25,6 +25,7 @@ __pycache__/
 *.pyo
 venv/
 .venv/
+pio_venv/
 
 # ESP32
 esp32_firmware/build/
