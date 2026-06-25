@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cloud
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: emo
+          POSTGRES_PASSWORD: emo_test
+          POSTGRES_DB: emo_test
+        ports:
+          - "5432:5432"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+          cache-dependency-path: cloud/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run lint
+      - run: pnpm run build
+      - run: pnpm run test
+        env:
+          DATABASE_URL: postgresql://emo:emo_test@localhost:5432/emo_test
+
+  firmware:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: esp32_firmware
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio
+            .pio
+          key: pio-${{ hashFiles('esp32_firmware/platformio.ini') }}
+      - run: pip install platformio
+      - run: pio run --environment esp32dev
+
+  flutter:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: flutter_app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.16"
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test

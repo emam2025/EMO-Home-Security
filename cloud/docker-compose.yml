@@ -1,0 +1,60 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: emo
+      POSTGRES_PASSWORD: emo_dev_password
+      POSTGRES_DB: emo
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  emqx:
+    image: emqx:5.3
+    restart: unless-stopped
+    environment:
+      EMQX_DASHBOARD__DEFAULT_USERNAME: admin
+      EMQX_DASHBOARD__DEFAULT_PASSWORD: emo_dev_password
+      EMQX_MQTT__TLS_ENABLE: "true"
+      EMQX_MQTT__TLS_CERT_FILE: "/opt/emqx/etc/certs/cert.pem"
+      EMQX_MQTT__TLS_KEY_FILE: "/opt/emqx/etc/certs/key.pem"
+    ports:
+      - "1883:1883"
+      - "8883:8883"
+      - "18083:18083"
+    volumes:
+      - emqxdata:/opt/emqx/data
+      - emqx_certs:/opt/emqx/etc/certs
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - ../.env
+    depends_on:
+      - postgres
+      - redis
+      - emqx
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+volumes:
+  pgdata:
+  emqxdata:
+  emqx_certs:

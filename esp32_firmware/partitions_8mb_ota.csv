@@ -1,0 +1,141 @@
+# ESP32 Partition Scheme Update
+## Update partitions_8mb_ota.csv in esp32_firmware/ folder
+### To prevent errors when flashing the firmware, ensure the partition scheme matches the one used by the ESP32 module.
+
+### The new partition scheme should be as follows:
+
+# Name, Type, SubType, Offset, Size, Flags
+
+app0, app, ota_0, 0x10000, 0x1E0000,
+
+app1, app, ota_1, 0x1F0000, 0x1E0000,
+
+app2, app, ota_2, 0x20000, 0x1E0000,
+
+app3, app, ota_3, 0x22000, 0x1E0000,
+
+spiffs, data, spiffs, 0x3D0000, 0x40000,
+
+ota_0, ota, ota, 0x28000, 0x1E0000,
+
+ota_1, ota, ota, 0x2A0000, 0x1E0000,
+
+ota_2, ota, ota, 0x2C0000, 0x1E0000,
+
+ota_3, ota, ota, 0x2E0000, 0x1E0000,
+
+ota_4, ota, ota, 0x30000, 0x1E0000,
+
+ota_5, ota, ota, 0x32000, 0x1E0000,
+
+ota_6, ota, ota, 0x34000, 0x1E0000,
+
+ota_7, ota, ota, 0x36000, 0x1E0000,
+
+ota_8, ota, ota, 0x38000, 0x1E0000,
+
+ota_9, ota, ota, 0x3A0000, 0x1E0000,
+
+ota_10, ota, ota, 0x3C0000, 0x1E0000,
+
+ota_11, ota, ota, 0x3E0000, 0x1E0000,
+
+ota_12, ota, ota, 0x40000, 0x1E0000,
+
+ota_13, ota, ota, 0x42000, 0x1E0000,
+
+ota_14, ota, ota, 0x44000, 0x1E0000,
+
+ota_15, ota, ota, 0x46000, 0x1E0000,
+
+ota_16, ota, ota, 0x48000, 0x1E0000,
+
+ota_17, ota, ota, 0x4A0000, 0x1E0000,
+
+ota_18, ota, ota, 0x4C0000, 0x1E0000,
+
+ota_19, ota, ota, 0x4E0000, 0x1E0000,
+
+ota_20, ota, ota, 0x50000, 0x1E0000,
+
+ota_21, ota, ota, 0x52000, 0x1E0000,
+
+ota_22, ota, ota, 0x54000, 0x1E0000,
+
+ota_23, ota, ota, 0x56000, 0x1E0000,
+
+ota_24, ota, ota, 0x58000, 0x1E0000,
+
+ota_25, ota, ota, 0x5A0000, 0x1E0000,
+
+ota_26, ota, ota, 0x5C0000, 0x1E0000,
+
+ota_27, ota, ota, 0x5E0000, 0x1E0000,
+
+ota_28, ota, ota, 0x60000, 0x1E0000,
+
+ota_29, ota, ota, 0x62000, 0x1E0000,
+
+ota_30, ota, ota, 0x64000, 0x1E0000,
+
+ota_31, ota, ota, 0x66000, 0x1E0000,
+
+ota_32, ota, ota, 0x68000, 0x1E0000,
+
+ota_33, ota, ota, 0x6A0000, 0x1E0000,
+
+ota_34, ota, ota, 0x6C0000, 0x1E0000,
+
+ota_35, ota, ota, 0x6E0000, 0x1E0000,
+
+ota_36, ota, ota, 0x70000, 0x1E0000,
+
+ota_37, ota, ota, 0x72000, 0x1E0000,
+
+ota_38, ota, ota, 0x74000, 0x1E0000,
+
+ota_39, ota, ota, 0x76000, 0x1E0000,
+
+ota_40, ota, ota, 0x78000, 0x1E0000,
+
+ota_41, ota, ota, 0x7A0000, 0x1E0000,
+
+ota_42, ota, ota, 0x7C0000, 0x1E0000,
+
+ota_43, ota, ota, 0x7E0000, 0x1E0000,
+
+ota_44, ota, ota, 0x80000, 0x1E0000,
+
+ota_45, ota, ota, 0x82000, 0x1E0000,
+
+ota_46, ota, ota, 0x84000, 0x1E0000,
+
+ota_47, ota, ota, 0x86000, 0x1E0000,
+
+ota_48, ota, ota, 0x88000, 0x1E0000,
+
+ota_49, ota, ota, 0x8A0000, 0x1E0000,
+
+ota_50, ota, ota, 0x8C0000, 0x1E0000,
+
+ota_51, ota, ota, 0x8E0000, 0x1E0000,
+
+ota_52, ota, ota, 0x90000, 0x1E0000,
+
+ota_53, ota, ota, 0x92000, 0x1E0000,
+
+ota_54, ota, ota, 0x94000, 0x1E0000,
+
+ota_55, ota, ota, 0x96000, 0x1E0000,
+
+ota_56, ota, ota, 0x98000, 0x1E0000,
+
+ota_57, ota, ota, 0x9A0000, 0x1E0000,
+
+ota_58, ota, ota, 0x9C0000, 0x1E0000,
+
+ota_59, ota, ota, 0x9E0000, 0x1E0000,
+
+ota_60, ota, ota, 0xA0000, 0x1E0000,
+
+ota_61, ota, ota, 0xA2000, 0x1E0000

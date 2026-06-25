@@ -1,0 +1,283 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  parent
+  admin
+}
+
+enum HomeMemberRole {
+  parent
+  child
+  admin
+}
+
+enum NetworkDeviceStatus {
+  pending
+  approved
+  blocked
+  unknown
+}
+
+enum ActionOnExhaust {
+  block
+  throttle
+}
+
+enum DnsProvider {
+  cloudflare
+  google
+  opendns
+  custom
+}
+
+enum NewDeviceDefaultAction {
+  approve
+  block
+  notify
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         UserRole @default(parent)
+  fcmToken     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  homesOwned    Home[]
+  homeMembers   HomeMember[]
+  notifications Notification[]
+
+  @@index([email])
+}
+
+model Home {
+  id        String   @id @default(uuid())
+  name      String
+  ownerId   String
+  timezone  String   @default("UTC")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner          User            @relation(fields: [ownerId], references: [id])
+  members        HomeMember[]
+  profiles       Profile[]
+  routers        Router[]
+  devices        Device[]
+  networkDevices NetworkDevice[]
+  policies       Policy[]
+
+  @@index([ownerId])
+}
+
+model HomeMember {
+  homeId String
+  userId String
+
+  role HomeMemberRole @default(child)
+
+  home Home @relation(fields: [homeId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([homeId, userId])
+  @@index([userId])
+}
+
+model Profile {
+  id        String   @id @default(uuid())
+  homeId    String
+  name      String
+  avatar    String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  home           Home            @relation(fields: [homeId], references: [id], onDelete: Cascade)
+  networkDevices NetworkDevice[]
+  quotaRules     QuotaRule[]
+  schedules      Schedule[]
+  usageLogs      UsageLog[]
+
+  @@index([homeId])
+}
+
+model Router {
+  id                          String   @id @default(uuid())
+  homeId                      String
+  model                       String
+  manufacturer                String
+  ipAddress                   String
+  macAddress                  String
+  serialNumber                String?
+  firmwareVersion             String?
+  credentialsEncrypted        String?
+  factoryCredentialsEncrypted String?
+  configSnapshot              Json?
+  fingerprint                 String?
+  isManaged                   Boolean  @default(false)
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+
+  home           Home            @relation(fields: [homeId], references: [id], onDelete: Cascade)
+  devices        Device[]
+  networkDevices NetworkDevice[]
+
+  @@index([homeId])
+  @@index([macAddress])
+  @@index([serialNumber])
+}
+
+model Device {
+  id                    String    @id @default(uuid())
+  homeId                String
+  routerId              String
+  macAddress            String    @unique
+  firmwareVersion       String?
+  mqttUsername          String?
+  mqttPasswordEncrypted String?
+  pairingCode           String?
+  pairedAt              DateTime?
+  lastSeenAt            DateTime?
+  isOnline              Boolean   @default(false)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  home   Home    @relation(fields: [homeId], references: [id], onDelete: Cascade)
+  router Router  @relation(fields: [routerId], references: [id], onDelete: Cascade)
+  events Event[]
+
+  @@index([homeId])
+  @@index([routerId])
+  @@index([macAddress])
+}
+
+model NetworkDevice {
+  id          String              @id @default(uuid())
+  homeId      String
+  routerId    String
+  profileId   String?
+  macAddress  String
+  ipAddress   String?
+  hostname    String?
+  vendor      String?
+  status      NetworkDeviceStatus @default(pending)
+  firstSeenAt DateTime            @default(now())
+  lastSeenAt  DateTime            @default(now())
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  home      Home       @relation(fields: [homeId], references: [id], onDelete: Cascade)
+  router    Router     @relation(fields: [routerId], references: [id], onDelete: Cascade)
+  profile   Profile?   @relation(fields: [profileId], references: [id])
+  usageLogs UsageLog[]
+
+  @@index([homeId])
+  @@index([routerId])
+  @@index([profileId])
+  @@index([macAddress])
+  @@index([status])
+}
+
+model QuotaRule {
+  id              String          @id @default(uuid())
+  profileId       String
+  quotaGb         Decimal         @default(0)
+  consumedGb      Decimal         @default(0)
+  period          String          @default("monthly")
+  actionOnExhaust ActionOnExhaust @default(block)
+  resetDay        Int             @default(1)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+}
+
+model Schedule {
+  id         String   @id @default(uuid())
+  profileId  String
+  enabled    Boolean  @default(true)
+  activeDays Json     @default("[]")
+  timeSlots  Json     @default("[]")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+}
+
+model UsageLog {
+  id              String   @id @default(uuid())
+  profileId       String
+  networkDeviceId String
+  bytesDownloaded BigInt   @default(0)
+  bytesUploaded   BigInt   @default(0)
+  loggedAt        DateTime @default(now())
+
+  profile       Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  networkDevice NetworkDevice @relation(fields: [networkDeviceId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([networkDeviceId])
+  @@index([loggedAt])
+  // PERFORMANCE: Composite index for common query pattern: "get usage by profile within date range"
+  @@index([profileId, loggedAt])
+}
+
+model Policy {
+  id                     String                 @id @default(uuid())
+  homeId                 String
+  dnsProvider            DnsProvider            @default(cloudflare)
+  customDnsPrimary       String?
+  customDnsSecondary     String?
+  whitelistEnabled       Boolean                @default(false)
+  newDeviceDefaultAction NewDeviceDefaultAction @default(notify)
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+
+  home Home @relation(fields: [homeId], references: [id], onDelete: Cascade)
+
+  @@index([homeId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  title     String
+  body      String?
+  data      Json?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+}
+
+model Event {
+  id        String   @id @default(uuid())
+  deviceId  String
+  type      String
+  payload   Json?
+  createdAt DateTime @default(now())
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([deviceId])
+  @@index([type])
+  @@index([createdAt])
+}
