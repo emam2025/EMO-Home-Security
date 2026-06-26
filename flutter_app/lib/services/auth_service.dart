@@ -8,8 +8,8 @@ class AuthService {
 
   Future<User> login(String email, String password) async {
     final response = await _api.login(email, password);
-    final accessToken = response['access_token'] as String;
-    final refreshToken = response['refresh_token'] as String;
+    final accessToken = response['accessToken'] as String;
+    final refreshToken = response['refreshToken'] as String;
     await _storage.write(key: 'access_token', value: accessToken);
     await _storage.write(key: 'refresh_token', value: refreshToken);
     return User.fromJson(response['user'] as Map<String, dynamic>);
@@ -17,8 +17,8 @@ class AuthService {
 
   Future<User> register(String email, String password, String name) async {
     final response = await _api.register(email, password, name);
-    final accessToken = response['access_token'] as String;
-    final refreshToken = response['refresh_token'] as String;
+    final accessToken = response['accessToken'] as String;
+    final refreshToken = response['refreshToken'] as String;
     await _storage.write(key: 'access_token', value: accessToken);
     await _storage.write(key: 'refresh_token', value: refreshToken);
     return User.fromJson(response['user'] as Map<String, dynamic>);

@@ -54,11 +54,22 @@ export class AuthService {
     }
   }
 
-  private generateTokens(userId: string, email: string) {
+  private async generateTokens(userId: string, email: string) {
     const payload = { sub: userId, email };
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { homeMembers: { take: 1 } },
+    });
     return {
       accessToken: this.jwtService.sign(payload, { expiresIn: '15m' }),
       refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' }),
+      user: {
+        id: user!.id,
+        email: user!.email,
+        name: user!.name,
+        role: user!.role,
+        homeId: user!.homeMembers[0]?.homeId ?? null,
+      },
     };
   }
 }

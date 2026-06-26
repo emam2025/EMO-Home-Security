@@ -17,7 +17,7 @@ class ApiClient {
   static final ApiClient _instance = ApiClient._internal();
   factory ApiClient() => _instance;
 
-  String baseUrl = 'http://localhost:3000/v1';
+  String baseUrl = 'http://localhost:3000';
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   http.Client _httpClient = http.Client();
 
