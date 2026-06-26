@@ -287,7 +287,7 @@ flutter_app/ → Flutter Build → APK/IPA → App Store
 |---------|--------|----------|
 | **M0 – Foundation** | ✅ Complete | Project structure, Docker Compose, CI/CD |
 | **M1 – Core Cloud** | ✅ Complete | Auth (JWT), 14 Prisma models, 17 Controllers, MQTT, 7 unit tests |
-| **M2 – ESP32 Connectivity** | ✅ Complete | NetworkManager, MqttClient (TLS), Registration, IRouterDriver, NVS |
+| **M2 – ESP32 Connectivity** | ✅ Complete (Phase 1 hardening applied) | NetworkManager, MqttClient (TLS), Registration, IRouterDriver, NVS |
 | **M3 – Router Driver** | ✅ Complete | Full Huawei HG8145V5 (10 functions: login, block, whitelist, statistics...) |
 | **M4 – Device Discovery** | ✅ Complete | DevicePoll (60s), Publish to cloud |
 | **M5 – Profiles and Quotas** | ✅ Complete | CRUD Profiles + Quotas with ESP32 enforcement |
@@ -354,6 +354,46 @@ flutter_app/ → Flutter Build → APK/IPA → App Store
 | `docs/system_architecture.md` | Updated architecture diagram |
 | `docs/mvp_execution_plan.md` | Detailed execution plan |
 | `docs/non_goals.md` | Out-of-scope document – **essential to avoid scope creep** |
+
+---
+
+---
+
+## 11. Phase 1 Completion Report — Security Hotfixes
+
+> **Duration:** 26 June 2026 (4 hours)
+> **Status:** ✅ All 5 directives complete (100%)
+
+### 11.1 Directives Executed
+
+| Directive | Commit | Result |
+|---|---|---|
+| **1.1 — HomeMembershipGuard** | `d54136b` | 13 e2e tests — 403 on cross-home access |
+| **1.2 — JWT Fallback + Env Validation** | `4371cc2` | `BootError` on missing env vars, no more `|| 'dev-secret'` |
+| **1.3 — AES-256-GCM (Cloud + ESP32)** | `0b0895f` | mbedTLS GCM replaces XOR, HKDF key derivation, 21 unit + 23 e2e tests |
+| **1.4 — Rate Limiting** | `d41bcf5` | `@nestjs/throttler` — 100 req/min global, 5 req/min on auth |
+| **1.5 — UsersController RBAC + RolesGuard** | `0e1793c` | `@Roles('admin')` decorator, self-or-admin access rules, 10 e2e tests |
+
+### 11.2 Key Fixes
+
+- **Prisma interceptor**: `Object.defineProperty` bypasses Prisma 5.22.0 Proxy trap — raw DB shows ciphertext, API returns decrypted
+- **XOR → AES-256-GCM**: ESP32 `credential_manager.cpp` rewritten with mbedTLS `gcm_crypt_and_tag` + HKDF-SHA256
+- **Rate limiting**: `@Throttle({ default: { ttl: 60000, limit: 5 } })` on `AuthController`
+
+### 11.3 Test Results
+
+| Suite | Tests | Status |
+|---|---|---|
+| Unit tests | 21 (4 suites) | ✅ 100% |
+| E2e: HomeMembershipGuard | 13 | ✅ 100% |
+| E2e: Encryption (AES-256-GCM) | 6 | ✅ 100% |
+| E2e: App (auth flow) | 4 | ✅ 100% |
+| E2e: Users RBAC | 10 | ✅ 100% |
+
+### 11.4 Technical Debt Registered (10 items)
+
+- **TD-001 → TD-006**: Recorded during Phase 1 execution
+- **TD-007 → TD-010**: Identified during Phase 1 closure review (see `docs/technical-debt.md`)
 
 ---
 
