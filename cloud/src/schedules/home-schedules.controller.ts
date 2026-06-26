@@ -1,10 +1,11 @@
 import { Controller, Get, Put, Body, Param, UseGuards, ValidationPipe } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { HomeMembershipGuard } from '../common/guards/home-membership.guard';
 import { SchedulesService } from './schedules.service';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 
 @Controller('homes/:homeId/schedules')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, HomeMembershipGuard)
 export class HomeSchedulesController {
   constructor(private schedulesService: SchedulesService) {}
 

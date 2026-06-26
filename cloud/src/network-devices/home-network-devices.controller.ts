@@ -1,10 +1,11 @@
 import { Controller, Post, Get, Body, Param, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { HomeMembershipGuard } from '../common/guards/home-membership.guard';
 import { NetworkDevicesService } from './network-devices.service';
 import { NetworkDeviceStatus } from '@prisma/client';
 
 @Controller('homes/:homeId/network-devices')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, HomeMembershipGuard)
 export class HomeNetworkDevicesController {
   constructor(private networkDevicesService: NetworkDevicesService) {}
 

@@ -1,9 +1,10 @@
 import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { HomeMembershipGuard } from '../common/guards/home-membership.guard';
 import { DevicesService } from './devices.service';
 
 @Controller('homes/:homeId/devices')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, HomeMembershipGuard)
 export class HomeDevicesController {
   constructor(private devicesService: DevicesService) {}
 

@@ -1,9 +1,10 @@
 import { Controller, Get, Put, Body, Param, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { HomeMembershipGuard } from '../common/guards/home-membership.guard';
 import { QuotasService } from './quotas.service';
 
 @Controller('homes/:homeId/quotas')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, HomeMembershipGuard)
 export class HomeQuotasController {
   constructor(private quotasService: QuotasService) {}
 

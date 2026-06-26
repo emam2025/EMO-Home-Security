@@ -10,6 +10,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { HomeMembershipGuard } from '../common/guards/home-membership.guard';
 import { RoutersService } from './routers.service';
 import { CreateRouterDto } from './dto/create-router.dto';
 import { UpdateRouterDto } from './dto/update-router.dto';
@@ -25,6 +26,7 @@ export class RoutersController {
   }
 
   @Get('home/:homeId')
+  @UseGuards(HomeMembershipGuard)
   findByHome(@Param('homeId') homeId: string) {
     return this.routersService.findByHome(homeId);
   }

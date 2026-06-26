@@ -1,5 +1,6 @@
 import { Controller, Post, Param, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { HomeMembershipGuard } from '../common/guards/home-membership.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { HomesService } from './homes.service';
 import { MqttService } from '../mqtt/mqtt.service';
@@ -10,7 +11,7 @@ function hasRouters(home: any): home is { routers: any[] } {
 }
 
 @Controller('homes/:homeId')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, HomeMembershipGuard)
 export class HomeResourcesController {
   constructor(
     private homesService: HomesService,
