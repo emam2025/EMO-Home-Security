@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module';
 import { validateEnv } from './config/env.validation';
 import { CommonModule } from './common/common.module';
@@ -21,6 +23,10 @@ import { HomeResourcesController } from './homes/home-resources.controller';
   controllers: [HomeResourcesController],
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '../.env', validate: validateEnv }),
+    ThrottlerModule.forRoot([{
+      ttl: 60000,
+      limit: 100,
+    }]),
     CommonModule,
     PrismaModule,
     AuthModule,
@@ -35,6 +41,12 @@ import { HomeResourcesController } from './homes/home-resources.controller';
     NotificationsModule,
     MqttModule,
     UsageModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}
